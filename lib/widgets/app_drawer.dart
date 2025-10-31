@@ -20,7 +20,7 @@ class _AppDrawerState extends State<AppDrawer> {
       child: SafeArea(
         child: Column(
           children: [
-            // Header dengan Logo dan Info Institusi
+            // Header dengan Logo
             Container(
               padding: const EdgeInsets.all(AppConstants.paddingLarge),
               decoration: const BoxDecoration(
@@ -29,39 +29,11 @@ class _AppDrawerState extends State<AppDrawer> {
                   bottom: BorderSide(color: AppColors.divider, width: 1),
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Logo
-                  Row(
-                    children: [
-                      SvgPicture.asset(
-                        AppConstants.logoPath,
-                        height: 40,
-                        width: 40,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Tracer Study',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              'Institut Teknologi Kalimantan',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              child: Center(
+                child: SvgPicture.asset(
+                  AppConstants.logoPath,
+                  height: 40,
+                ),
               ),
             ),
             
