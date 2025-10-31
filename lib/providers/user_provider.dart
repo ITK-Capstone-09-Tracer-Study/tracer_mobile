@@ -3,7 +3,7 @@ import '../models/user_model.dart';
 
 class UserProvider extends ChangeNotifier {
   // Dummy data untuk development
-  List<UserModel> _users = [
+  final List<UserModel> _users = [
     UserModel(
       id: '1',
       name: 'Dr. Budi Santoso, S.T., M.T.',

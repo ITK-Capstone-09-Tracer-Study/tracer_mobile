@@ -289,7 +289,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                 
                 // Role Dropdown
                 DropdownButtonFormField<String>(
-                  value: _selectedRole,
+                  initialValue: _selectedRole,
                   decoration: const InputDecoration(
                     labelText: 'Role',
                     prefixIcon: Icon(Icons.work_outline),
@@ -318,7 +318,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                 
                 // Unit Dropdown
                 DropdownButtonFormField<String>(
-                  value: _selectedUnit,
+                  initialValue: _selectedUnit,
                   decoration: const InputDecoration(
                     labelText: 'Unit',
                     prefixIcon: Icon(Icons.business_outlined),

@@ -183,7 +183,7 @@ class _AddUnitDialogState extends State<AddUnitDialog> {
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      value: _selectedParentId,
+                      initialValue: _selectedParentId,
                       isExpanded: true,
                       decoration: const InputDecoration(
                         hintText: 'Select position',

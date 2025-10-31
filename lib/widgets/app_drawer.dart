@@ -215,7 +215,7 @@ class _AppDrawerState extends State<AppDrawer> {
         ),
       ),
       selected: isSelected,
-      selectedTileColor: AppColors.primary.withOpacity(0.08),
+      selectedTileColor: AppColors.primary.withValues(alpha: 0.08),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
       ),

@@ -98,7 +98,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<String>(
-                        value: _selectedGroupBy.isEmpty ? null : _selectedGroupBy,
+                        initialValue: _selectedGroupBy.isEmpty ? null : _selectedGroupBy,
                         decoration: const InputDecoration(
                           labelText: 'Group by',
                           contentPadding: EdgeInsets.symmetric(
@@ -198,7 +198,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
               final index = entry.key;
               final user = entry.value;
               return _buildUserRow(context, user, index);
-            }).toList(),
+            }),
           ],
         ),
       ),
@@ -250,7 +250,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: isEven ? AppColors.surface : AppColors.surfaceVariant.withOpacity(0.3),
+          color: isEven ? AppColors.surface : AppColors.surfaceVariant.withValues(alpha: 0.3),
           border: const Border(
             bottom: BorderSide(color: AppColors.divider, width: 0.5),
           ),
