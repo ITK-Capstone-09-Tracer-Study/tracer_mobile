@@ -8,33 +8,34 @@ class UserProvider extends ChangeNotifier {
       id: '1',
       name: 'Dr. Budi Santoso, S.T., M.T.',
       email: 'budi.santoso@itk.ac.id',
-      role: 'Dosen',
-      unit: 'Teknik Informatika',
+      role: 'HeadOfUnit',
+      unitType: 'Faculty',
+      unitId: '1',
+      unitName: 'Fakultas Teknologi Industri',
       nikNip: '198501012010121001',
       phone: '+62 812-3456-7890',
-      position: 'Kepala Program Studi',
       createdAt: DateTime.now().subtract(const Duration(days: 365)),
     ),
     UserModel(
       id: '2',
       name: 'Siti Rahmawati, S.Kom., M.Kom.',
       email: 'siti.rahmawati@itk.ac.id',
-      role: 'Dosen',
-      unit: 'Teknik Informatika',
+      role: 'MajorTeam',
+      unitType: 'Major',
+      unitId: '1',
+      unitName: 'Teknik Informatika',
       nikNip: '199002152015042002',
       phone: '+62 813-4567-8901',
-      position: 'Dosen',
       createdAt: DateTime.now().subtract(const Duration(days: 300)),
     ),
     UserModel(
       id: '3',
       name: 'Ahmad Fauzi',
       email: 'ahmad.fauzi@itk.ac.id',
-      role: 'Staff',
-      unit: 'Administrasi',
+      role: 'TracerTeam',
+      unitType: 'Institutional',
       nikNip: '199203202018031003',
       phone: '+62 814-5678-9012',
-      position: 'Staff Administrasi',
       createdAt: DateTime.now().subtract(const Duration(days: 200)),
     ),
     UserModel(
@@ -42,43 +43,43 @@ class UserProvider extends ChangeNotifier {
       name: 'Dewi Lestari',
       email: 'dewi.lestari@itk.ac.id',
       role: 'Admin',
-      unit: 'Teknik Informatika',
+      unitType: 'Institutional',
       nikNip: '199305102019032004',
       phone: '+62 815-6789-0123',
-      position: 'Administrator Sistem',
       createdAt: DateTime.now().subtract(const Duration(days: 150)),
     ),
     UserModel(
       id: '5',
       name: 'Muhammad Rizki',
-      email: 'muhammad.rizki@student.itk.ac.id',
-      role: 'Alumni',
-      unit: 'Teknik Informatika',
+      email: 'muhammad.rizki@itk.ac.id',
+      role: 'HeadOfUnit',
+      unitType: 'Major',
+      unitId: '2',
+      unitName: 'Teknik Elektro',
       nikNip: '11190001',
       phone: '+62 816-7890-1234',
-      position: 'Alumni',
       createdAt: DateTime.now().subtract(const Duration(days: 100)),
     ),
     UserModel(
       id: '6',
       name: 'Putri Amelia',
-      email: 'putri.amelia@student.itk.ac.id',
-      role: 'Mahasiswa',
-      unit: 'Teknik Informatika',
+      email: 'putri.amelia@itk.ac.id',
+      role: 'MajorTeam',
+      unitType: 'Major',
+      unitId: '3',
+      unitName: 'Teknik Mesin',
       nikNip: '11210001',
       phone: '+62 817-8901-2345',
-      position: 'Mahasiswa Aktif',
       createdAt: DateTime.now().subtract(const Duration(days: 50)),
     ),
     UserModel(
       id: '7',
       name: 'Dr. Ir. Bambang Supriyanto, M.Eng.',
       email: 'bambang.supriyanto@itk.ac.id',
-      role: 'Dosen',
-      unit: 'Teknik Elektro',
+      role: 'TracerTeam',
+      unitType: 'Institutional',
       nikNip: '197801051999031001',
       phone: '+62 818-9012-3456',
-      position: 'Profesor',
       createdAt: DateTime.now().subtract(const Duration(days: 500)),
     ),
   ];
@@ -102,7 +103,8 @@ class UserProvider extends ChangeNotifier {
       return user.name.toLowerCase().contains(query) ||
              user.email.toLowerCase().contains(query) ||
              user.role.toLowerCase().contains(query) ||
-             user.unit.toLowerCase().contains(query) ||
+             (user.unitName?.toLowerCase().contains(query) ?? false) ||
+             (user.unitType?.toLowerCase().contains(query) ?? false) ||
              (user.nikNip?.toLowerCase().contains(query) ?? false);
     }).toList();
   }
@@ -155,10 +157,11 @@ class UserProvider extends ChangeNotifier {
   Map<String, List<UserModel>> getUsersByUnit() {
     final Map<String, List<UserModel>> grouped = {};
     for (var user in filteredUsers) {
-      if (!grouped.containsKey(user.unit)) {
-        grouped[user.unit] = [];
+      final unitKey = user.unitName ?? user.unitType ?? 'No Unit';
+      if (!grouped.containsKey(unitKey)) {
+        grouped[unitKey] = [];
       }
-      grouped[user.unit]!.add(user);
+      grouped[unitKey]!.add(user);
     }
     return grouped;
   }

@@ -24,9 +24,9 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
   late TextEditingController _emailController;
   late TextEditingController _nikNipController;
   late TextEditingController _phoneController;
-  late TextEditingController _positionController;
   late String _selectedRole;
-  late String _selectedUnit;
+  late String? _selectedUnitType;
+  late String? _selectedUnitName;
   bool _isModified = false;
 
   @override
@@ -36,9 +36,9 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
     _emailController = TextEditingController();
     _nikNipController = TextEditingController();
     _phoneController = TextEditingController();
-    _positionController = TextEditingController();
     _selectedRole = '';
-    _selectedUnit = '';
+    _selectedUnitType = null;
+    _selectedUnitName = null;
   }
 
   @override
@@ -47,7 +47,6 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
     _emailController.dispose();
     _nikNipController.dispose();
     _phoneController.dispose();
-    _positionController.dispose();
     super.dispose();
   }
 
@@ -56,9 +55,9 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
     _emailController.text = user.email;
     _nikNipController.text = user.nikNip ?? '';
     _phoneController.text = user.phone ?? '';
-    _positionController.text = user.position ?? '';
     _selectedRole = user.role;
-    _selectedUnit = user.unit;
+    _selectedUnitType = user.unitType;
+    _selectedUnitName = user.unitName;
   }
 
   void _markAsModified() {
@@ -76,9 +75,9 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
         email: _emailController.text,
         nikNip: _nikNipController.text.isEmpty ? null : _nikNipController.text,
         phone: _phoneController.text.isEmpty ? null : _phoneController.text,
-        position: _positionController.text.isEmpty ? null : _positionController.text,
         role: _selectedRole,
-        unit: _selectedUnit,
+        unitType: _selectedUnitType,
+        unitName: _selectedUnitName,
       );
 
       context.read<UserProvider>().updateUser(widget.userId, updatedUser);
@@ -316,44 +315,31 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                 
                 const SizedBox(height: AppConstants.paddingMedium),
                 
-                // Unit Dropdown
-                DropdownButtonFormField<String>(
-                  initialValue: _selectedUnit,
-                  decoration: const InputDecoration(
-                    labelText: 'Unit',
-                    prefixIcon: Icon(Icons.business_outlined),
+                // Unit Type (readonly - for display only)
+                if (_selectedUnitType != null) ...[
+                  TextFormField(
+                    initialValue: _selectedUnitType,
+                    decoration: const InputDecoration(
+                      labelText: 'Unit Type',
+                      prefixIcon: Icon(Icons.category_outlined),
+                    ),
+                    enabled: false,
                   ),
-                  items: AppConstants.units.map((unit) {
-                    return DropdownMenuItem(
-                      value: unit,
-                      child: Text(unit),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedUnit = value!;
-                    });
-                    _markAsModified();
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please select a unit';
-                    }
-                    return null;
-                  },
-                ),
+                  const SizedBox(height: AppConstants.paddingMedium),
+                ],
                 
-                const SizedBox(height: AppConstants.paddingMedium),
-                
-                // Position Field
-                TextFormField(
-                  controller: _positionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Position',
-                    prefixIcon: Icon(Icons.assignment_ind_outlined),
+                // Unit Name (readonly - for display only)
+                if (_selectedUnitName != null) ...[
+                  TextFormField(
+                    initialValue: _selectedUnitName,
+                    decoration: const InputDecoration(
+                      labelText: 'Unit',
+                      prefixIcon: Icon(Icons.business_outlined),
+                    ),
+                    enabled: false,
                   ),
-                  onChanged: (_) => _markAsModified(),
-                ),
+                  const SizedBox(height: AppConstants.paddingMedium),
+                ],
                 
                 const SizedBox(height: AppConstants.paddingXLarge),
                 

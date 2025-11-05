@@ -37,16 +37,22 @@ class AppConstants {
   static const double borderRadiusLarge = 12.0;
   static const double borderRadiusXLarge = 16.0;
   
-  // User Roles
+  // User Roles (sesuai API backend)
   static const List<String> userRoles = [
     'Admin',
-    'Staff',
-    'Dosen',
-    'Alumni',
-    'Mahasiswa',
+    'TracerTeam',
+    'MajorTeam',
+    'HeadOfUnit',
   ];
   
-  // Units (contoh data)
+  // Unit Types (sesuai API backend)
+  static const List<String> unitTypes = [
+    'Institutional',
+    'Faculty',
+    'Major',
+  ];
+  
+  // Units (contoh data - akan diganti dengan data dari API)
   static const List<String> units = [
     'Teknik Informatika',
     'Teknik Elektro',

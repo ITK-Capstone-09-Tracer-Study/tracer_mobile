@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/unit_provider.dart';
 import '../../models/user_model.dart';
 import '../../constants/colors.dart';
 import '../../constants/app_constants.dart';
@@ -23,12 +24,17 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _nikNipController = TextEditingController();
   
   // Module Permissions
   String? _selectedRole;
   String? _selectedUnitType;
+  String? _selectedFaculty;
+  String? _selectedMajor;
   final TextEditingController _roleSearchController = TextEditingController();
   final TextEditingController _unitTypeSearchController = TextEditingController();
+  final TextEditingController _facultySearchController = TextEditingController();
+  final TextEditingController _majorSearchController = TextEditingController();
   
   final List<String> _roles = [
     'Admin',
@@ -45,9 +51,13 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
   
   List<String> _filteredRoles = [];
   List<String> _filteredUnitTypes = [];
+  List<String> _filteredFaculties = [];
+  List<String> _filteredMajors = [];
   
   bool _isRoleDropdownOpen = false;
   bool _isUnitTypeDropdownOpen = false;
+  bool _isFacultyDropdownOpen = false;
+  bool _isMajorDropdownOpen = false;
 
   @override
   void initState() {
@@ -62,8 +72,11 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _phoneController.dispose();
+    _nikNipController.dispose();
     _roleSearchController.dispose();
     _unitTypeSearchController.dispose();
+    _facultySearchController.dispose();
+    _majorSearchController.dispose();
     super.dispose();
   }
 
@@ -91,6 +104,40 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
     });
   }
 
+  void _filterFaculties(String query) {
+    final unitProvider = context.read<UnitProvider>();
+    final faculties = unitProvider.getFakultasList()
+        .map((unit) => unit.name)
+        .toList();
+    
+    setState(() {
+      if (query.isEmpty) {
+        _filteredFaculties = faculties;
+      } else {
+        _filteredFaculties = faculties
+            .where((name) => name.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      }
+    });
+  }
+
+  void _filterMajors(String query) {
+    final unitProvider = context.read<UnitProvider>();
+    final majors = unitProvider.getUnitsByType('program_studi')
+        .map((unit) => unit.name)
+        .toList();
+    
+    setState(() {
+      if (query.isEmpty) {
+        _filteredMajors = majors;
+      } else {
+        _filteredMajors = majors
+            .where((name) => name.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      }
+    });
+  }
+
   void _createEmployee() {
     if (_formKey.currentState!.validate()) {
       if (_selectedRole == null) {
@@ -103,14 +150,80 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
         return;
       }
       
-      if (_selectedUnitType == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please select a unit type'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-        return;
+      // Validation based on role
+      String? unitType;
+      String? unitId;
+      String? unitName;
+      
+      if (_selectedRole == 'HeadOfUnit') {
+        if (_selectedUnitType == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please select a unit type'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+          return;
+        }
+        
+        unitType = _selectedUnitType;
+        
+        if (_selectedUnitType == 'Faculty') {
+          if (_selectedFaculty == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Please select a faculty'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+            return;
+          }
+          unitName = _selectedFaculty;
+          // Get faculty ID from UnitProvider
+          final unitProvider = context.read<UnitProvider>();
+          final faculty = unitProvider.getFakultasList()
+              .firstWhere((unit) => unit.name == _selectedFaculty);
+          unitId = faculty.id;
+        } else if (_selectedUnitType == 'Major') {
+          if (_selectedMajor == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Please select a major'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+            return;
+          }
+          unitName = _selectedMajor;
+          // Get major ID from UnitProvider
+          final unitProvider = context.read<UnitProvider>();
+          final major = unitProvider.getUnitsByType('program_studi')
+              .firstWhere((unit) => unit.name == _selectedMajor);
+          unitId = major.id;
+        } else {
+          // Institutional
+          unitName = 'Institutional';
+        }
+      } else if (_selectedRole == 'MajorTeam') {
+        if (_selectedMajor == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please select a major'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+          return;
+        }
+        unitType = 'Major';
+        unitName = _selectedMajor;
+        // Get major ID from UnitProvider
+        final unitProvider = context.read<UnitProvider>();
+        final major = unitProvider.getUnitsByType('program_studi')
+            .firstWhere((unit) => unit.name == _selectedMajor);
+        unitId = major.id;
+      } else {
+        // Admin and TracerTeam
+        unitType = 'Institutional';
       }
 
       final newUser = UserModel(
@@ -118,9 +231,11 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
         name: _nameController.text,
         email: _emailController.text,
         role: _selectedRole!,
-        unit: _selectedUnitType!,
+        unitType: unitType,
+        unitId: unitId,
+        unitName: unitName,
+        nikNip: _nikNipController.text.isEmpty ? null : _nikNipController.text,
         phone: _phoneController.text.isEmpty ? null : _phoneController.text,
-        position: _selectedRole,
         createdAt: DateTime.now(),
       );
 
@@ -298,6 +413,18 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
         
         const SizedBox(height: AppConstants.paddingLarge),
         
+        // NIK/NIP Field
+        _buildLabel('NIK/NIP'),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: _nikNipController,
+          decoration: const InputDecoration(
+            hintText: 'NIK/NIP',
+          ),
+        ),
+        
+        const SizedBox(height: AppConstants.paddingLarge),
+        
         // Password Field
         _buildLabel('Password', required: true),
         const SizedBox(height: 8),
@@ -342,7 +469,7 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
         _buildLabel('Role', required: true),
         const SizedBox(height: 8),
         _buildSearchableDropdown(
-          hint: 'Select department',
+          hint: 'Select a role',
           value: _selectedRole,
           items: _filteredRoles,
           searchController: _roleSearchController,
@@ -352,6 +479,8 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
               _isRoleDropdownOpen = !_isRoleDropdownOpen;
               if (_isRoleDropdownOpen) {
                 _isUnitTypeDropdownOpen = false;
+                _isFacultyDropdownOpen = false;
+                _isMajorDropdownOpen = false;
                 _roleSearchController.clear();
                 _filteredRoles = _roles;
               }
@@ -362,39 +491,161 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
             setState(() {
               _selectedRole = value;
               _isRoleDropdownOpen = false;
+              // Reset unit selections when role changes
+              _selectedUnitType = null;
+              _selectedFaculty = null;
+              _selectedMajor = null;
             });
           },
         ),
         
         const SizedBox(height: AppConstants.paddingLarge),
         
-        // Unit Type Field with Searchable Dropdown
-        _buildLabel('Unit Type', required: true),
-        const SizedBox(height: 8),
-        _buildSearchableDropdown(
-          hint: 'Select position',
-          value: _selectedUnitType,
-          items: _filteredUnitTypes,
-          searchController: _unitTypeSearchController,
-          isOpen: _isUnitTypeDropdownOpen,
-          onToggle: () {
-            setState(() {
-              _isUnitTypeDropdownOpen = !_isUnitTypeDropdownOpen;
-              if (_isUnitTypeDropdownOpen) {
-                _isRoleDropdownOpen = false;
-                _unitTypeSearchController.clear();
-                _filteredUnitTypes = _unitTypes;
-              }
-            });
-          },
-          onSearch: _filterUnitTypes,
-          onSelect: (value) {
-            setState(() {
-              _selectedUnitType = value;
-              _isUnitTypeDropdownOpen = false;
-            });
-          },
-        ),
+        // Conditional fields based on role
+        // MajorTeam: Show Major selector
+        if (_selectedRole == 'MajorTeam') ...[
+          _buildLabel('Major', required: true),
+          const SizedBox(height: 8),
+          _buildSearchableDropdown(
+            hint: 'Select a major',
+            value: _selectedMajor,
+            items: _filteredMajors,
+            searchController: _majorSearchController,
+            isOpen: _isMajorDropdownOpen,
+            onToggle: () {
+              setState(() {
+                _isMajorDropdownOpen = !_isMajorDropdownOpen;
+                if (_isMajorDropdownOpen) {
+                  _isRoleDropdownOpen = false;
+                  _isUnitTypeDropdownOpen = false;
+                  _isFacultyDropdownOpen = false;
+                  _majorSearchController.clear();
+                  // Load majors from UnitProvider
+                  final unitProvider = context.read<UnitProvider>();
+                  _filteredMajors = unitProvider.getUnitsByType('program_studi')
+                      .map((unit) => unit.name)
+                      .toList();
+                }
+              });
+            },
+            onSearch: _filterMajors,
+            onSelect: (value) {
+              setState(() {
+                _selectedMajor = value;
+                _isMajorDropdownOpen = false;
+              });
+            },
+          ),
+        ],
+        
+        // HeadOfUnit: Show Unit Type, then Faculty or Major based on selection
+        if (_selectedRole == 'HeadOfUnit') ...[
+          _buildLabel('Unit', required: true),
+          const SizedBox(height: 8),
+          _buildSearchableDropdown(
+            hint: 'Select a unit type',
+            value: _selectedUnitType,
+            items: _filteredUnitTypes,
+            searchController: _unitTypeSearchController,
+            isOpen: _isUnitTypeDropdownOpen,
+            onToggle: () {
+              setState(() {
+                _isUnitTypeDropdownOpen = !_isUnitTypeDropdownOpen;
+                if (_isUnitTypeDropdownOpen) {
+                  _isRoleDropdownOpen = false;
+                  _isFacultyDropdownOpen = false;
+                  _isMajorDropdownOpen = false;
+                  _unitTypeSearchController.clear();
+                  _filteredUnitTypes = _unitTypes;
+                }
+              });
+            },
+            onSearch: _filterUnitTypes,
+            onSelect: (value) {
+              setState(() {
+                _selectedUnitType = value;
+                _isUnitTypeDropdownOpen = false;
+                // Reset faculty and major when unit type changes
+                _selectedFaculty = null;
+                _selectedMajor = null;
+              });
+            },
+          ),
+          
+          const SizedBox(height: AppConstants.paddingLarge),
+          
+          // Show Faculty selector if Faculty is selected
+          if (_selectedUnitType == 'Faculty') ...[
+            _buildLabel('Faculty', required: true),
+            const SizedBox(height: 8),
+            _buildSearchableDropdown(
+              hint: 'Select a faculty',
+              value: _selectedFaculty,
+              items: _filteredFaculties,
+              searchController: _facultySearchController,
+              isOpen: _isFacultyDropdownOpen,
+              onToggle: () {
+                setState(() {
+                  _isFacultyDropdownOpen = !_isFacultyDropdownOpen;
+                  if (_isFacultyDropdownOpen) {
+                    _isRoleDropdownOpen = false;
+                    _isUnitTypeDropdownOpen = false;
+                    _isMajorDropdownOpen = false;
+                    _facultySearchController.clear();
+                    // Load faculties from UnitProvider
+                    final unitProvider = context.read<UnitProvider>();
+                    _filteredFaculties = unitProvider.getFakultasList()
+                        .map((unit) => unit.name)
+                        .toList();
+                  }
+                });
+              },
+              onSearch: _filterFaculties,
+              onSelect: (value) {
+                setState(() {
+                  _selectedFaculty = value;
+                  _isFacultyDropdownOpen = false;
+                });
+              },
+            ),
+          ],
+          
+          // Show Major selector if Major is selected
+          if (_selectedUnitType == 'Major') ...[
+            _buildLabel('Major', required: true),
+            const SizedBox(height: 8),
+            _buildSearchableDropdown(
+              hint: 'Select a major',
+              value: _selectedMajor,
+              items: _filteredMajors,
+              searchController: _majorSearchController,
+              isOpen: _isMajorDropdownOpen,
+              onToggle: () {
+                setState(() {
+                  _isMajorDropdownOpen = !_isMajorDropdownOpen;
+                  if (_isMajorDropdownOpen) {
+                    _isRoleDropdownOpen = false;
+                    _isUnitTypeDropdownOpen = false;
+                    _isFacultyDropdownOpen = false;
+                    _majorSearchController.clear();
+                    // Load majors from UnitProvider
+                    final unitProvider = context.read<UnitProvider>();
+                    _filteredMajors = unitProvider.getUnitsByType('program_studi')
+                        .map((unit) => unit.name)
+                        .toList();
+                  }
+                });
+              },
+              onSearch: _filterMajors,
+              onSelect: (value) {
+                setState(() {
+                  _selectedMajor = value;
+                  _isMajorDropdownOpen = false;
+                });
+              },
+            ),
+          ],
+        ],
       ],
     );
   }

@@ -261,7 +261,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
             _buildDataCell(user.name, width: 200),
             _buildDataCell(user.email, width: 250),
             _buildDataCell(user.role, width: 150),
-            _buildDataCell(user.unit, width: 200),
+            _buildDataCell(user.unitName ?? user.unitType ?? '-', width: 200),
           ],
         ),
       ),
