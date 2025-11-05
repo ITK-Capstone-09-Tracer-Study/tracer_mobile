@@ -1,0 +1,4356 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "Laravel",
+        "version": "0.0.1"
+    },
+    "servers": [
+        {
+            "url": "http:\/\/localhost:8000\/api"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Department"
+        },
+        {
+            "name": "Faculty"
+        },
+        {
+            "name": "Major"
+        },
+        {
+            "name": "User"
+        },
+        {
+            "name": "SurveyKind"
+        },
+        {
+            "name": "Survey"
+        }
+    ],
+    "security": [
+        {
+            "http": []
+        }
+    ],
+    "paths": {
+        "\/{panel}\/departments": {
+            "post": {
+                "operationId": "admin.departments.create",
+                "summary": "Create Department",
+                "tags": [
+                    "Department"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/CreateDepartmentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`DepartmentTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/DepartmentTransformer"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully Create Resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            },
+            "get": {
+                "operationId": "admin.departments.pagination",
+                "summary": "List of Department",
+                "tags": [
+                    "Department"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "fields[departments]",
+                        "in": "query",
+                        "description": "Possible values are: `id`, `faculty_id`, `name`, `created_at`. For multiple options, separate them by comma.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Possible values are: `id`, `faculty_id`, `name`, `created_at`, `faculty.name`. For multiple options, separate them by comma.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fields[faculty]",
+                        "in": "query",
+                        "description": "Possible values are: `name`. For multiple options, separate them by comma.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[name]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[faculty_id]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Possible values are: `name`, `created_at`, `faculty.name`. For multiple options, separate them by comma. For descending order, add `-` at the front of the sort.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Possible values are: `faculty`. For multiple options, separate them by comma. For descending order, add `-` at the front of the include.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `DepartmentTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#\/components\/schemas\/DepartmentTransformer"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page."
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice."
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated."
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/{panel}\/departments\/{id}": {
+            "put": {
+                "operationId": "admin.departments.update",
+                "summary": "Update Department",
+                "tags": [
+                    "Department"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/UpdateDepartmentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`DepartmentTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/DepartmentTransformer"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully Update Resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Resource not found"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "admin.departments.delete",
+                "summary": "Delete Department",
+                "tags": [
+                    "Department"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`DepartmentTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/DepartmentTransformer"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully Delete Resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Resource not found"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            },
+            "get": {
+                "operationId": "admin.departments.detail",
+                "summary": "Show Department",
+                "tags": [
+                    "Department"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`DepartmentTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/DepartmentTransformer"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Resource not found"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/{panel}\/faculties": {
+            "post": {
+                "operationId": "admin.faculties.create",
+                "summary": "Create Faculty",
+                "tags": [
+                    "Faculty"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/CreateFacultyRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`FacultyTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/FacultyTransformer"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully Create Resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            },
+            "get": {
+                "operationId": "admin.faculties.pagination",
+                "summary": "List of Faculty",
+                "tags": [
+                    "Faculty"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "fields[faculties]",
+                        "in": "query",
+                        "description": "Possible values are: `id`, `name`, `created_at`. For multiple options, separate them by comma.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Possible values are: `id`, `name`, `created_at`. For multiple options, separate them by comma.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[name]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Possible values are: `name`, `created_at`. For multiple options, separate them by comma. For descending order, add `-` at the front of the sort.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Possible values are: `departments`. For multiple options, separate them by comma. For descending order, add `-` at the front of the include.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `FacultyTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#\/components\/schemas\/FacultyTransformer"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page."
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice."
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated."
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/{panel}\/faculties\/{id}": {
+            "put": {
+                "operationId": "admin.faculties.update",
+                "summary": "Update Faculty",
+                "tags": [
+                    "Faculty"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/UpdateFacultyRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`FacultyTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/FacultyTransformer"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully Update Resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Resource not found"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "admin.faculties.delete",
+                "summary": "Delete Faculty",
+                "tags": [
+                    "Faculty"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`FacultyTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/FacultyTransformer"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully Delete Resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Resource not found"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            },
+            "get": {
+                "operationId": "admin.faculties.detail",
+                "summary": "Show Faculty",
+                "tags": [
+                    "Faculty"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`FacultyTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/FacultyTransformer"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Resource not found"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/{panel}\/majors": {
+            "post": {
+                "operationId": "admin.majors.create",
+                "summary": "Create Major",
+                "tags": [
+                    "Major"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/CreateMajorRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`MajorTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/MajorTransformer"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully Create Resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            },
+            "get": {
+                "operationId": "admin.majors.pagination",
+                "summary": "List of Major",
+                "tags": [
+                    "Major"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "fields[majors]",
+                        "in": "query",
+                        "description": "Possible values are: `id`, `department_id`, `code`, `name`. For multiple options, separate them by comma.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Possible values are: `id`, `department_id`, `code`, `name`, `department.name`, `department.faculty.name`. For multiple options, separate them by comma.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fields[department]",
+                        "in": "query",
+                        "description": "Possible values are: `name`. For multiple options, separate them by comma.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fields[department.faculty]",
+                        "in": "query",
+                        "description": "Possible values are: `name`. For multiple options, separate them by comma.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[name]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[code]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[department_id]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[department.name]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[department.faculty.name]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Possible values are: `name`, `code`, `created_at`, `department.name`, `department.faculty.name`. For multiple options, separate them by comma. For descending order, add `-` at the front of the sort.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Possible values are: `department`, `department.faculty`. For multiple options, separate them by comma. For descending order, add `-` at the front of the include.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `MajorTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#\/components\/schemas\/MajorTransformer"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page."
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice."
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated."
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/{panel}\/majors\/{id}": {
+            "put": {
+                "operationId": "admin.majors.update",
+                "summary": "Update Major",
+                "tags": [
+                    "Major"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/UpdateMajorRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`MajorTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/MajorTransformer"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully Update Resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Resource not found"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "admin.majors.delete",
+                "summary": "Delete Major",
+                "tags": [
+                    "Major"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`MajorTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/MajorTransformer"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully Delete Resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Resource not found"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            },
+            "get": {
+                "operationId": "admin.majors.detail",
+                "summary": "Show Major",
+                "tags": [
+                    "Major"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`MajorTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/MajorTransformer"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Resource not found"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/{panel}\/surveys": {
+            "post": {
+                "operationId": "tracer_team.surveys.create",
+                "summary": "Create Survey",
+                "tags": [
+                    "Survey"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/CreateSurveyRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`SurveyTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/SurveyTransformer"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully Create Resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            },
+            "get": {
+                "operationId": "tracer_team.surveys.pagination",
+                "summary": "List of Survey",
+                "tags": [
+                    "Survey"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "fields[surveys]",
+                        "in": "query",
+                        "description": "Possible values are: `id`, `kind_id`, `graduation_number`, `title`, `description`, `started_at`, `ended_at`. For multiple options, separate them by comma.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Possible values are: `id`, `kind_id`, `graduation_number`, `title`, `description`, `started_at`, `ended_at`, `kind.id`, `kind.name`. For multiple options, separate them by comma.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fields[kind]",
+                        "in": "query",
+                        "description": "Possible values are: `id`, `name`. For multiple options, separate them by comma.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[kind_id]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[graduation_number]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[title]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[description]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[kind.name]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[sections.title]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[sections.description]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[sections.questions]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Possible values are: `graduation_number`, `title`, `started_at`, `ended_at`. For multiple options, separate them by comma. For descending order, add `-` at the front of the sort.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Possible values are: `kind`. For multiple options, separate them by comma. For descending order, add `-` at the front of the include.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `PaginatedSurveyTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#\/components\/schemas\/PaginatedSurveyTransformer"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page."
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice."
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated."
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/{panel}\/surveys\/{id}": {
+            "put": {
+                "operationId": "tracer_team.surveys.update",
+                "summary": "Update Survey",
+                "tags": [
+                    "Survey"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/UpdateSurveyRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`SurveyTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/SurveyTransformer"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully Update Resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Resource not found"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "tracer_team.surveys.delete",
+                "summary": "Delete Survey",
+                "tags": [
+                    "Survey"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`SurveyTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/SurveyTransformer"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully Delete Resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Resource not found"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            },
+            "get": {
+                "operationId": "tracer_team.surveys.detail",
+                "summary": "Show Survey",
+                "tags": [
+                    "Survey"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`SurveyTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/SurveyTransformer"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Resource not found"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/{panel}\/survey-kinds": {
+            "post": {
+                "operationId": "tracer_team.survey-kinds.create",
+                "summary": "Create SurveyKind",
+                "tags": [
+                    "SurveyKind"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/CreateSurveyKindRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`SurveyKindTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/SurveyKindTransformer"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully Create Resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            },
+            "get": {
+                "operationId": "tracer_team.survey-kinds.pagination",
+                "summary": "List of SurveyKind",
+                "tags": [
+                    "SurveyKind"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "fields[survey_kinds]",
+                        "in": "query",
+                        "description": "Possible values are: `id`, `name`, `respondent_role`, `order`. For multiple options, separate them by comma.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Possible values are: `id`, `name`, `respondent_role`, `order`. For multiple options, separate them by comma.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[name]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[respondent_role]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[order]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Possible values are: `name`, `respondent_role`, `order`. For multiple options, separate them by comma. For descending order, add `-` at the front of the sort.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Possible values are: `surveys`. For multiple options, separate them by comma. For descending order, add `-` at the front of the include.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `SurveyKindTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#\/components\/schemas\/SurveyKindTransformer"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page."
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice."
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated."
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/{panel}\/survey-kinds\/{id}": {
+            "put": {
+                "operationId": "tracer_team.survey-kinds.update",
+                "summary": "Update SurveyKind",
+                "tags": [
+                    "SurveyKind"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/UpdateSurveyKindRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`SurveyKindTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/SurveyKindTransformer"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully Update Resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Resource not found"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "tracer_team.survey-kinds.delete",
+                "summary": "Delete SurveyKind",
+                "tags": [
+                    "SurveyKind"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`SurveyKindTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/SurveyKindTransformer"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully Delete Resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Resource not found"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            },
+            "get": {
+                "operationId": "tracer_team.survey-kinds.detail",
+                "summary": "Show SurveyKind",
+                "tags": [
+                    "SurveyKind"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`SurveyKindTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/SurveyKindTransformer"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Resource not found"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/{panel}\/users": {
+            "post": {
+                "operationId": "admin.users.create",
+                "summary": "Create User",
+                "tags": [
+                    "User"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/CreateUserRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`UserTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/UserTransformer"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully Create Resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            },
+            "get": {
+                "operationId": "admin.users.pagination",
+                "summary": "List of User",
+                "tags": [
+                    "User"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "fields[users]",
+                        "in": "query",
+                        "description": "Possible values are: `id`, `email`, `role`, `unit_type`, `unit_id`, `name`, `phone_number`. For multiple options, separate them by comma.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "Possible values are: `id`, `email`, `role`, `unit_type`, `unit_id`, `name`, `phone_number`, `unit.name`. For multiple options, separate them by comma.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fields[unit]",
+                        "in": "query",
+                        "description": "Possible values are: `name`. For multiple options, separate them by comma.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[email]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[role]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[unit_type]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[name]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "filter[phone_number]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "Possible values are: `email`, `role`, `unit_type`, `name`, `phone_number`, `created_at`, `updated_at`. For multiple options, separate them by comma. For descending order, add `-` at the front of the sort.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "include",
+                        "in": "query",
+                        "description": "Possible values are: `unit`. For multiple options, separate them by comma. For descending order, add `-` at the front of the include.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated set of `UserTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#\/components\/schemas\/UserTransformer"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
+                                                        ]
+                                                    }
+                                                },
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page."
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice."
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated."
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "links",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/{panel}\/users\/{id}": {
+            "put": {
+                "operationId": "admin.users.update",
+                "summary": "Update User",
+                "tags": [
+                    "User"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/UpdateUserRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`UserTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/UserTransformer"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully Update Resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Resource not found"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#\/components\/responses\/ValidationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "admin.users.delete",
+                "summary": "Delete User",
+                "tags": [
+                    "User"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`UserTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/UserTransformer"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Successfully Delete Resource"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Resource not found"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            },
+            "get": {
+                "operationId": "admin.users.detail",
+                "summary": "Show User",
+                "tags": [
+                    "User"
+                ],
+                "parameters": [
+                    {
+                        "name": "panel",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`UserTransformer`",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#\/components\/schemas\/UserTransformer"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Resource not found"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "\/auth\/login": {
+            "post": {
+                "operationId": "auth.login",
+                "summary": "Login",
+                "tags": [
+                    "Auth"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application\/json": {
+                            "schema": {
+                                "$ref": "#\/components\/schemas\/LoginRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "401": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "The provided credentials are incorrect."
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "success",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Login success."
+                                            ]
+                                        },
+                                        "token": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "success",
+                                        "message",
+                                        "token"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "\/auth\/logout": {
+            "post": {
+                "operationId": "auth.logout",
+                "summary": "Logout",
+                "tags": [
+                    "Auth"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application\/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Logout success."
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "success",
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#\/components\/responses\/AuthenticationException"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "http": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        },
+        "schemas": {
+            "CreateDepartmentRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "faculty_id": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "name",
+                    "faculty_id"
+                ],
+                "title": "CreateDepartmentRequest"
+            },
+            "CreateFacultyRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255
+                    }
+                },
+                "required": [
+                    "name"
+                ],
+                "title": "CreateFacultyRequest"
+            },
+            "CreateMajorRequest": {
+                "type": "object",
+                "properties": {
+                    "department_id": {
+                        "type": "integer"
+                    },
+                    "code": {
+                        "type": "string",
+                        "maxLength": 50
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255
+                    }
+                },
+                "required": [
+                    "department_id",
+                    "code",
+                    "name"
+                ],
+                "title": "CreateMajorRequest"
+            },
+            "CreateSurveyKindRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "respondent_role": {
+                        "$ref": "#\/components\/schemas\/RespondentRole"
+                    },
+                    "order": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "name",
+                    "respondent_role",
+                    "order"
+                ],
+                "title": "CreateSurveyKindRequest"
+            },
+            "CreateSurveyRequest": {
+                "type": "object",
+                "properties": {
+                    "kind_id": {
+                        "type": "integer"
+                    },
+                    "graduation_number": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "If no timezone provided, assumed to be in UTC"
+                    },
+                    "ended_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "If no timezone provided, assumed to be in UTC"
+                    },
+                    "sections": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "title": {
+                                    "type": "string"
+                                },
+                                "description": {
+                                    "type": "string"
+                                },
+                                "questions": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "type": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "short_answer",
+                                                    "paragraph",
+                                                    "multiple_choice",
+                                                    "checkboxes",
+                                                    "linear_scale"
+                                                ]
+                                            },
+                                            "question": {
+                                                "type": "string"
+                                            },
+                                            "required": {
+                                                "type": "boolean"
+                                            },
+                                            "has_condition": {
+                                                "type": "boolean",
+                                                "description": "This field is only for `multiple_choice` and `checkboxes` question type."
+                                            },
+                                            "options": {
+                                                "type": "array",
+                                                "description": "This field is only for `multiple_choice` and `checkboxes` question type.",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "label": {
+                                                            "type": "string"
+                                                        },
+                                                        "value": {
+                                                            "type": "string"
+                                                        },
+                                                        "condition": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "label",
+                                                        "value"
+                                                    ]
+                                                }
+                                            },
+                                            "from_label": {
+                                                "type": "string",
+                                                "description": "This field is only for `linear_scale` question type."
+                                            },
+                                            "from_value": {
+                                                "type": "integer",
+                                                "description": "This field is only for `linear_scale` question type."
+                                            },
+                                            "to_label": {
+                                                "type": "string",
+                                                "description": "This field is only for `linear_scale` question type."
+                                            },
+                                            "to_value": {
+                                                "type": "integer",
+                                                "description": "This field is only for `linear_scale` question type."
+                                            }
+                                        },
+                                        "required": [
+                                            "type",
+                                            "question",
+                                            "required",
+                                            "has_condition",
+                                            "options",
+                                            "from_label",
+                                            "from_value",
+                                            "to_label",
+                                            "to_value"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": [
+                                "title",
+                                "description",
+                                "questions"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "kind_id",
+                    "graduation_number",
+                    "title",
+                    "description",
+                    "started_at",
+                    "ended_at",
+                    "sections"
+                ],
+                "title": "CreateSurveyRequest"
+            },
+            "CreateUserRequest": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "password": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "$ref": "#\/components\/schemas\/Role"
+                    },
+                    "unit_type": {
+                        "description": "For `admin` and `tracer_team` role, this field must be `institutional`.\nFor `major_team` role, this field must be `major`.\nFor `head_of_unit` role, this field allows for all options.",
+                        "$ref": "#\/components\/schemas\/Unit"
+                    },
+                    "unit_id": {
+                        "type": "string",
+                        "description": "For `faculty` unit_type, this field must be id from faculties.\nFor `major` unit_type, this field must be id from majors.\nFor `institutional` role, this field must be `null`.",
+                        "enum": [
+                            ""
+                        ]
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "phone_number": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "email",
+                    "password",
+                    "role",
+                    "unit_type",
+                    "name",
+                    "phone_number"
+                ],
+                "title": "CreateUserRequest"
+            },
+            "DepartmentTransformer": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "faculty_id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "id",
+                    "faculty_id",
+                    "name",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "DepartmentTransformer"
+            },
+            "FacultyTransformer": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "FacultyTransformer"
+            },
+            "LoginRequest": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "password": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "title": "LoginRequest"
+            },
+            "MajorTransformer": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "department_id": {
+                        "type": "integer"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "id",
+                    "department_id",
+                    "code",
+                    "name",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "MajorTransformer"
+            },
+            "PaginatedSurveyTransformer": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "kind_id": {
+                        "type": "integer"
+                    },
+                    "graduation_number": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "ended_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "kind": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#\/components\/schemas\/SurveyKindTransformer"
+                        }
+                    },
+                    "sections": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#\/components\/schemas\/Section"
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "kind_id",
+                    "graduation_number",
+                    "title",
+                    "description",
+                    "started_at",
+                    "ended_at",
+                    "created_at",
+                    "updated_at",
+                    "kind",
+                    "sections"
+                ],
+                "title": "PaginatedSurveyTransformer"
+            },
+            "RespondentRole": {
+                "type": "string",
+                "enum": [
+                    "alumni",
+                    "supervisor"
+                ],
+                "title": "RespondentRole"
+            },
+            "Role": {
+                "type": "string",
+                "enum": [
+                    "admin",
+                    "tracer_team",
+                    "major_team",
+                    "head_of_unit"
+                ],
+                "title": "Role"
+            },
+            "Section": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "survey_id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "questions": {
+                        "type": "array",
+                        "items": {}
+                    },
+                    "next_condition": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "order": {
+                        "type": "integer"
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "id",
+                    "survey_id",
+                    "title",
+                    "description",
+                    "questions",
+                    "next_condition",
+                    "order",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "Section"
+            },
+            "SurveyKindTransformer": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "respondent_role": {
+                        "$ref": "#\/components\/schemas\/RespondentRole"
+                    },
+                    "order": {
+                        "type": "integer"
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "respondent_role",
+                    "order",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "SurveyKindTransformer"
+            },
+            "SurveyTransformer": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "kind_id": {
+                        "type": "integer"
+                    },
+                    "graduation_number": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "ended_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "sections": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#\/components\/schemas\/Section"
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "kind_id",
+                    "graduation_number",
+                    "title",
+                    "description",
+                    "started_at",
+                    "ended_at",
+                    "created_at",
+                    "updated_at",
+                    "sections"
+                ],
+                "title": "SurveyTransformer"
+            },
+            "Unit": {
+                "type": "string",
+                "enum": [
+                    "institutional",
+                    "faculty",
+                    "major"
+                ],
+                "title": "Unit"
+            },
+            "UpdateDepartmentRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "faculty_id": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "name",
+                    "faculty_id"
+                ],
+                "title": "UpdateDepartmentRequest"
+            },
+            "UpdateFacultyRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255
+                    }
+                },
+                "required": [
+                    "name"
+                ],
+                "title": "UpdateFacultyRequest"
+            },
+            "UpdateMajorRequest": {
+                "type": "object",
+                "properties": {
+                    "department_id": {
+                        "type": "integer"
+                    },
+                    "code": {
+                        "type": "string",
+                        "maxLength": 50
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255
+                    }
+                },
+                "required": [
+                    "department_id",
+                    "code",
+                    "name"
+                ],
+                "title": "UpdateMajorRequest"
+            },
+            "UpdateSurveyKindRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "respondent_role": {
+                        "$ref": "#\/components\/schemas\/RespondentRole"
+                    },
+                    "order": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "name",
+                    "respondent_role",
+                    "order"
+                ],
+                "title": "UpdateSurveyKindRequest"
+            },
+            "UpdateSurveyRequest": {
+                "type": "object",
+                "properties": {
+                    "kind_id": {
+                        "type": "integer"
+                    },
+                    "graduation_number": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "started_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "If no timezone provided, assumed to be in UTC"
+                    },
+                    "ended_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "If no timezone provided, assumed to be in UTC"
+                    },
+                    "sections": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "title": {
+                                    "type": "string"
+                                },
+                                "description": {
+                                    "type": "string"
+                                },
+                                "questions": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "type": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "short_answer",
+                                                    "paragraph",
+                                                    "multiple_choice",
+                                                    "checkboxes",
+                                                    "linear_scale"
+                                                ]
+                                            },
+                                            "question": {
+                                                "type": "string"
+                                            },
+                                            "required": {
+                                                "type": "boolean"
+                                            },
+                                            "has_condition": {
+                                                "type": "boolean",
+                                                "description": "This field is only for `multiple_choice` and `checkboxes` question type."
+                                            },
+                                            "options": {
+                                                "type": "array",
+                                                "description": "This field is only for `multiple_choice` and `checkboxes` question type.",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "label": {
+                                                            "type": "string"
+                                                        },
+                                                        "value": {
+                                                            "type": "string"
+                                                        },
+                                                        "condition": {
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "label",
+                                                        "value"
+                                                    ]
+                                                }
+                                            },
+                                            "from_label": {
+                                                "type": "string",
+                                                "description": "This field is only for `linear_scale` question type."
+                                            },
+                                            "from_value": {
+                                                "type": "integer",
+                                                "description": "This field is only for `linear_scale` question type."
+                                            },
+                                            "to_label": {
+                                                "type": "string",
+                                                "description": "This field is only for `linear_scale` question type."
+                                            },
+                                            "to_value": {
+                                                "type": "integer",
+                                                "description": "This field is only for `linear_scale` question type."
+                                            }
+                                        },
+                                        "required": [
+                                            "type",
+                                            "question",
+                                            "required",
+                                            "has_condition",
+                                            "options",
+                                            "from_label",
+                                            "from_value",
+                                            "to_label",
+                                            "to_value"
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": [
+                                "title",
+                                "description",
+                                "questions"
+                            ]
+                        }
+                    }
+                },
+                "required": [
+                    "kind_id",
+                    "graduation_number",
+                    "title",
+                    "description",
+                    "started_at",
+                    "ended_at",
+                    "sections"
+                ],
+                "title": "UpdateSurveyRequest"
+            },
+            "UpdateUserRequest": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "password": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "$ref": "#\/components\/schemas\/Role"
+                    },
+                    "unit_type": {
+                        "description": "For `admin` and `tracer_team` role, this field must be `institutional`.\nFor `major_team` role, this field must be `major`.\nFor `head_of_unit` role, this field allows for all options.",
+                        "$ref": "#\/components\/schemas\/Unit"
+                    },
+                    "unit_id": {
+                        "type": "string",
+                        "description": "For `faculty` unit_type, this field must be id from faculties.\nFor `major` unit_type, this field must be id from majors.\nFor `institutional` role, this field must be `null`.",
+                        "enum": [
+                            ""
+                        ]
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "phone_number": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "email",
+                    "password",
+                    "role",
+                    "unit_type",
+                    "name",
+                    "phone_number"
+                ],
+                "title": "UpdateUserRequest"
+            },
+            "UserTransformer": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "email_verified_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "role": {
+                        "$ref": "#\/components\/schemas\/Role"
+                    },
+                    "unit_type": {
+                        "$ref": "#\/components\/schemas\/Unit"
+                    },
+                    "unit_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "phone_number": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "id",
+                    "email",
+                    "email_verified_at",
+                    "role",
+                    "unit_type",
+                    "unit_id",
+                    "name",
+                    "phone_number",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "UserTransformer"
+            }
+        },
+        "responses": {
+            "AuthenticationException": {
+                "description": "Unauthenticated",
+                "content": {
+                    "application\/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            },
+            "ValidationException": {
+                "description": "Validation error",
+                "content": {
+                    "application\/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Errors overview."
+                                },
+                                "errors": {
+                                    "type": "object",
+                                    "description": "A detailed description of each field that failed validation.",
+                                    "additionalProperties": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "required": [
+                                "message",
+                                "errors"
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
