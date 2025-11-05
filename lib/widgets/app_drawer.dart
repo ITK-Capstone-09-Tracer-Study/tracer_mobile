@@ -146,6 +146,35 @@ class _AppDrawerState extends State<AppDrawer> {
             
             // Footer
             const Divider(height: 1),
+            
+            // Logout Button
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.paddingMedium,
+                vertical: AppConstants.paddingSmall,
+              ),
+              child: ListTile(
+                leading: const Icon(
+                  Icons.logout,
+                  color: AppColors.error,
+                ),
+                title: const Text(
+                  'Logout',
+                  style: TextStyle(
+                    color: AppColors.error,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+                ),
+                onTap: () {
+                  Navigator.pop(context); // Close drawer
+                  _showLogoutDialog(context);
+                },
+              ),
+            ),
+            
             Padding(
               padding: const EdgeInsets.all(AppConstants.paddingMedium),
               child: Text(
@@ -156,6 +185,32 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.go('/login');
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.error,
+            ),
+            child: const Text('Logout'),
+          ),
+        ],
       ),
     );
   }
