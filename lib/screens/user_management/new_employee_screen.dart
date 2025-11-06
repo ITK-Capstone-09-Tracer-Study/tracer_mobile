@@ -36,21 +36,21 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
   final TextEditingController _facultySearchController = TextEditingController();
   final TextEditingController _majorSearchController = TextEditingController();
   
-  final List<String> _roles = [
-    'Admin',
-    'TracerTeam',
-    'MajorTeam',
-    'HeadOfUnit',
+  final List<Map<String, String>> _roles = [
+    {'value': 'admin', 'label': 'Admin'},
+    {'value': 'tracer_team', 'label': 'Tracer Team'},
+    {'value': 'major_team', 'label': 'Major Team'},
+    {'value': 'head_of_unit', 'label': 'Head of Unit'},
   ];
   
-  final List<String> _unitTypes = [
-    'Institutional',
-    'Faculty',
-    'Major',
+  final List<Map<String, String>> _unitTypes = [
+    {'value': 'institutional', 'label': 'Institutional'},
+    {'value': 'faculty', 'label': 'Faculty'},
+    {'value': 'major', 'label': 'Major'},
   ];
   
-  List<String> _filteredRoles = [];
-  List<String> _filteredUnitTypes = [];
+  List<Map<String, String>> _filteredRoles = [];
+  List<Map<String, String>> _filteredUnitTypes = [];
   List<String> _filteredFaculties = [];
   List<String> _filteredMajors = [];
   
@@ -86,7 +86,7 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
         _filteredRoles = _roles;
       } else {
         _filteredRoles = _roles
-            .where((role) => role.toLowerCase().contains(query.toLowerCase()))
+            .where((role) => role['label']!.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
     });
@@ -98,7 +98,7 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
         _filteredUnitTypes = _unitTypes;
       } else {
         _filteredUnitTypes = _unitTypes
-            .where((type) => type.toLowerCase().contains(query.toLowerCase()))
+            .where((type) => type['label']!.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
     });
@@ -152,10 +152,10 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
       
       // Validation based on role
       String? unitType;
-      String? unitId;
+      int? unitId;
       String? unitName;
       
-      if (_selectedRole == 'HeadOfUnit') {
+      if (_selectedRole == 'head_of_unit') {
         if (_selectedUnitType == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -168,7 +168,7 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
         
         unitType = _selectedUnitType;
         
-        if (_selectedUnitType == 'Faculty') {
+        if (_selectedUnitType == 'faculty') {
           if (_selectedFaculty == null) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -183,8 +183,8 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
           final unitProvider = context.read<UnitProvider>();
           final faculty = unitProvider.getFakultasList()
               .firstWhere((unit) => unit.name == _selectedFaculty);
-          unitId = faculty.id;
-        } else if (_selectedUnitType == 'Major') {
+          unitId = int.tryParse(faculty.id);
+        } else if (_selectedUnitType == 'major') {
           if (_selectedMajor == null) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -199,12 +199,13 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
           final unitProvider = context.read<UnitProvider>();
           final major = unitProvider.getUnitsByType('program_studi')
               .firstWhere((unit) => unit.name == _selectedMajor);
-          unitId = major.id;
+          unitId = int.tryParse(major.id);
         } else {
           // Institutional
+          unitType = 'institutional';
           unitName = 'Institutional';
         }
-      } else if (_selectedRole == 'MajorTeam') {
+      } else if (_selectedRole == 'major_team') {
         if (_selectedMajor == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -214,16 +215,16 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
           );
           return;
         }
-        unitType = 'Major';
+        unitType = 'major';
         unitName = _selectedMajor;
         // Get major ID from UnitProvider
         final unitProvider = context.read<UnitProvider>();
         final major = unitProvider.getUnitsByType('program_studi')
             .firstWhere((unit) => unit.name == _selectedMajor);
-        unitId = major.id;
+        unitId = int.tryParse(major.id);
       } else {
         // Admin and TracerTeam
-        unitType = 'Institutional';
+        unitType = 'institutional';
       }
 
       final newUser = UserModel(
@@ -235,7 +236,7 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
         unitId: unitId,
         unitName: unitName,
         nikNip: _nikNipController.text.isEmpty ? null : _nikNipController.text,
-        phone: _phoneController.text.isEmpty ? null : _phoneController.text,
+        phoneNumber: _phoneController.text.isEmpty ? null : _phoneController.text,
         createdAt: DateTime.now(),
       );
 
@@ -462,15 +463,27 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
   }
 
   Widget _buildModulePermissionsTab() {
+    // Get display label for selected role
+    String? roleLabel = _selectedRole != null 
+        ? _roles.firstWhere((r) => r['value'] == _selectedRole, 
+            orElse: () => {'label': _selectedRole!})['label']
+        : null;
+    
+    // Get display label for selected unit type
+    String? unitTypeLabel = _selectedUnitType != null 
+        ? _unitTypes.firstWhere((u) => u['value'] == _selectedUnitType, 
+            orElse: () => {'label': _selectedUnitType!})['label']
+        : null;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Role Field with Searchable Dropdown
         _buildLabel('Role', required: true),
         const SizedBox(height: 8),
-        _buildSearchableDropdown(
+        _buildRoleDropdown(
           hint: 'Select a role',
-          value: _selectedRole,
+          value: roleLabel,
           items: _filteredRoles,
           searchController: _roleSearchController,
           isOpen: _isRoleDropdownOpen,
@@ -503,7 +516,7 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
         
         // Conditional fields based on role
         // MajorTeam: Show Major selector
-        if (_selectedRole == 'MajorTeam') ...[
+        if (_selectedRole == 'major_team') ...[
           _buildLabel('Major', required: true),
           const SizedBox(height: 8),
           _buildSearchableDropdown(
@@ -539,12 +552,12 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
         ],
         
         // HeadOfUnit: Show Unit Type, then Faculty or Major based on selection
-        if (_selectedRole == 'HeadOfUnit') ...[
+        if (_selectedRole == 'head_of_unit') ...[
           _buildLabel('Unit', required: true),
           const SizedBox(height: 8),
-          _buildSearchableDropdown(
+          _buildUnitTypeDropdown(
             hint: 'Select a unit type',
-            value: _selectedUnitType,
+            value: unitTypeLabel,
             items: _filteredUnitTypes,
             searchController: _unitTypeSearchController,
             isOpen: _isUnitTypeDropdownOpen,
@@ -575,7 +588,7 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
           const SizedBox(height: AppConstants.paddingLarge),
           
           // Show Faculty selector if Faculty is selected
-          if (_selectedUnitType == 'Faculty') ...[
+          if (_selectedUnitType == 'faculty') ...[
             _buildLabel('Faculty', required: true),
             const SizedBox(height: 8),
             _buildSearchableDropdown(
@@ -611,7 +624,7 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
           ],
           
           // Show Major selector if Major is selected
-          if (_selectedUnitType == 'Major') ...[
+          if (_selectedUnitType == 'major') ...[
             _buildLabel('Major', required: true),
             const SizedBox(height: 8),
             _buildSearchableDropdown(
@@ -778,6 +791,254 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
                           ),
                           child: Text(
                             item,
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  // Role dropdown with Map<String, String> support
+  Widget _buildRoleDropdown({
+    required String hint,
+    required String? value,
+    required List<Map<String, String>> items,
+    required TextEditingController searchController,
+    required bool isOpen,
+    required VoidCallback onToggle,
+    required Function(String) onSearch,
+    required Function(String) onSelect,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Dropdown Button
+        InkWell(
+          onTap: onToggle,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              border: Border.all(
+                color: isOpen ? AppColors.primary : AppColors.border,
+                width: isOpen ? 2 : 1,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    value ?? hint,
+                    style: TextStyle(
+                      color: value == null 
+                          ? AppColors.textHint 
+                          : AppColors.textPrimary,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                Icon(
+                  isOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                  color: AppColors.textSecondary,
+                ),
+              ],
+            ),
+          ),
+        ),
+        
+        // Dropdown Menu
+        if (isOpen)
+          Container(
+            margin: const EdgeInsets.only(top: 4),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              border: Border.all(color: AppColors.border),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadow,
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Search Field
+                TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search...',
+                    prefixIcon: const Icon(Icons.search, size: 20),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onChanged: onSearch,
+                ),
+                
+                const SizedBox(height: 8),
+                
+                // Items List
+                Container(
+                  constraints: const BoxConstraints(maxHeight: 200),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      return InkWell(
+                        onTap: () => onSelect(item['value']!),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 12,
+                          ),
+                          child: Text(
+                            item['label']!,
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  // Unit Type dropdown with Map<String, String> support
+  Widget _buildUnitTypeDropdown({
+    required String hint,
+    required String? value,
+    required List<Map<String, String>> items,
+    required TextEditingController searchController,
+    required bool isOpen,
+    required VoidCallback onToggle,
+    required Function(String) onSearch,
+    required Function(String) onSelect,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Dropdown Button
+        InkWell(
+          onTap: onToggle,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              border: Border.all(
+                color: isOpen ? AppColors.primary : AppColors.border,
+                width: isOpen ? 2 : 1,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    value ?? hint,
+                    style: TextStyle(
+                      color: value == null 
+                          ? AppColors.textHint 
+                          : AppColors.textPrimary,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                Icon(
+                  isOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                  color: AppColors.textSecondary,
+                ),
+              ],
+            ),
+          ),
+        ),
+        
+        // Dropdown Menu
+        if (isOpen)
+          Container(
+            margin: const EdgeInsets.only(top: 4),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              border: Border.all(color: AppColors.border),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadow,
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Search Field
+                TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search...',
+                    prefixIcon: const Icon(Icons.search, size: 20),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onChanged: onSearch,
+                ),
+                
+                const SizedBox(height: 8),
+                
+                // Items List
+                Container(
+                  constraints: const BoxConstraints(maxHeight: 200),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      return InkWell(
+                        onTap: () => onSelect(item['value']!),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 12,
+                          ),
+                          child: Text(
+                            item['label']!,
                             style: const TextStyle(
                               color: AppColors.textPrimary,
                               fontSize: 14,

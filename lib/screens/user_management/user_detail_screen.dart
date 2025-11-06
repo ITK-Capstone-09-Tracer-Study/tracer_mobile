@@ -54,7 +54,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
     _nameController.text = user.name;
     _emailController.text = user.email;
     _nikNipController.text = user.nikNip ?? '';
-    _phoneController.text = user.phone ?? '';
+    _phoneController.text = user.phoneNumber ?? '';
     _selectedRole = user.role;
     _selectedUnitType = user.unitType;
     _selectedUnitName = user.unitName;
@@ -74,7 +74,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
         name: _nameController.text,
         email: _emailController.text,
         nikNip: _nikNipController.text.isEmpty ? null : _nikNipController.text,
-        phone: _phoneController.text.isEmpty ? null : _phoneController.text,
+        phoneNumber: _phoneController.text.isEmpty ? null : _phoneController.text,
         role: _selectedRole,
         unitType: _selectedUnitType,
         unitName: _selectedUnitName,
@@ -288,7 +288,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                 
                 // Role Dropdown
                 DropdownButtonFormField<String>(
-                  initialValue: _selectedRole,
+                  value: _selectedRole,
                   decoration: const InputDecoration(
                     labelText: 'Role',
                     prefixIcon: Icon(Icons.work_outline),
@@ -296,7 +296,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                   items: AppConstants.userRoles.map((role) {
                     return DropdownMenuItem(
                       value: role,
-                      child: Text(role),
+                      child: Text(AppConstants.userRoleLabels[role] ?? role),
                     );
                   }).toList(),
                   onChanged: (value) {
@@ -318,7 +318,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                 // Unit Type (readonly - for display only)
                 if (_selectedUnitType != null) ...[
                   TextFormField(
-                    initialValue: _selectedUnitType,
+                    initialValue: AppConstants.unitTypeLabels[_selectedUnitType] ?? _selectedUnitType,
                     decoration: const InputDecoration(
                       labelText: 'Unit Type',
                       prefixIcon: Icon(Icons.category_outlined),
