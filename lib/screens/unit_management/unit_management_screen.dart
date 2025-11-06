@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../widgets/app_drawer.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/add_unit_dialog.dart';
+import '../../widgets/edit_unit_dialog.dart';
 import '../../providers/unit_provider.dart';
 import '../../models/unit_model.dart';
 import '../../constants/app_constants.dart';
@@ -146,7 +147,7 @@ class _UnitManagementScreenState extends State<UnitManagementScreen> {
                   child: IconButton(
                     icon: const Icon(Icons.filter_list),
                     onPressed: () {
-                      // TODO: Implement filter
+                      
                     },
                   ),
                 ),
@@ -311,11 +312,9 @@ class _UnitManagementScreenState extends State<UnitManagementScreen> {
           ),
           TextButton.icon(
             onPressed: () {
-              // TODO: Navigate to edit screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Edit unit - Coming Soon'),
-                ),
+              showDialog(
+                context: context,
+                builder: (context) => EditUnitDialog(unit: unit),
               );
             },
             icon: const Icon(Icons.edit, size: 16),

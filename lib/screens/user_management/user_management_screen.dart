@@ -217,7 +217,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
           ? Checkbox(
               value: false,
               onChanged: (value) {
-                // TODO: Implement select all
+                
               },
             )
           : Row(
@@ -279,7 +279,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
       child: Checkbox(
         value: false,
         onChanged: (value) {
-          // TODO: Implement row selection
+          
         },
       ),
     );

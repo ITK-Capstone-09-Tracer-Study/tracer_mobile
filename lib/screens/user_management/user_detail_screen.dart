@@ -55,7 +55,10 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
     _emailController.text = user.email;
     _nikNipController.text = user.nikNip ?? '';
     _phoneController.text = user.phoneNumber ?? '';
-    _selectedRole = user.role;
+    // Ensure role is valid, default to 'admin' if not in the list
+    _selectedRole = AppConstants.userRoles.contains(user.role) 
+        ? user.role 
+        : 'admin';
     _selectedUnitType = user.unitType;
     _selectedUnitName = user.unitName;
   }
@@ -78,6 +81,8 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
         role: _selectedRole,
         unitType: _selectedUnitType,
         unitName: _selectedUnitName,
+        // Keep the original unitId, as it's managed through role/unit selection
+        // In the future with API, this will be properly updated through unit selector
       );
 
       context.read<UserProvider>().updateUser(widget.userId, updatedUser);
