@@ -6,6 +6,7 @@ import '../screens/user_management/user_management_screen.dart';
 import '../screens/user_management/user_detail_screen.dart';
 import '../screens/user_management/new_employee_screen.dart';
 import '../screens/unit_management/unit_management_screen.dart';
+import '../screens/survey_management/survey_management_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -53,6 +54,12 @@ class AppRouter {
         path: '/unit-management',
         name: 'unit-management',
         builder: (context, state) => const UnitManagementScreen(),
+      ),
+
+      GoRoute(
+        path: '/survey-management',
+        name: 'survey-management',
+        builder: (context, state) => const SurveyManagementScreen(),
       ),
     ],
     

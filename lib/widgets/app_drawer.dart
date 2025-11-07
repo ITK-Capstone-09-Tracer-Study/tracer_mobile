@@ -13,6 +13,7 @@ class AppDrawer extends StatefulWidget {
 
 class _AppDrawerState extends State<AppDrawer> {
   bool _isUserDirectoryExpanded = false;
+  bool _isQuestionnaireExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -136,6 +137,35 @@ class _AppDrawerState extends State<AppDrawer> {
                           icon: Icons.person_outline,
                           title: 'Employee Directory',
                           route: '/user-management',
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  // Questionnaire dengan dropdown
+                  Theme(
+                    data: Theme.of(context).copyWith(
+                      dividerColor: Colors.transparent,
+                    ),
+                    child: ExpansionTile(
+                      leading: const Icon(Icons.assignment_outlined),
+                      title: const Text('Questionnaire'),
+                      trailing: Icon(
+                        _isQuestionnaireExpanded 
+                            ? Icons.keyboard_arrow_up 
+                            : Icons.keyboard_arrow_down,
+                      ),
+                      onExpansionChanged: (expanded) {
+                        setState(() {
+                          _isQuestionnaireExpanded = expanded;
+                        });
+                      },
+                      children: [
+                        _buildSubMenuItem(
+                          context,
+                          icon: Icons.description_outlined,
+                          title: 'Survey Management',
+                          route: '/survey-management',
                         ),
                       ],
                     ),

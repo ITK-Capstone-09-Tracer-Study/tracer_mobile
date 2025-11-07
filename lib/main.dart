@@ -4,6 +4,7 @@ import 'theme/app_theme.dart';
 import 'routes/app_router.dart';
 import 'providers/user_provider.dart';
 import 'providers/unit_provider.dart';
+import 'providers/survey_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,6 +19,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => UnitProvider()),
+        ChangeNotifierProvider(create: (_) => SurveyProvider()),
       ],
       child: MaterialApp.router(
         title: 'Tracer Study ITK',
