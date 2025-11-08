@@ -6,6 +6,7 @@ import '../../providers/survey_provider.dart';
 import '../../models/survey_model.dart';
 import '../../constants/app_constants.dart';
 import '../../constants/colors.dart';
+import 'survey_detail_screen.dart';
 
 class SurveyManagementScreen extends StatefulWidget {
   const SurveyManagementScreen({super.key});
@@ -316,10 +317,11 @@ class _SurveyManagementScreenState extends State<SurveyManagementScreen> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            // TODO: Navigate to survey detail
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Buka detail: ${survey.title}'),
+            // Navigate to survey detail
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SurveyDetailScreen(survey: survey),
               ),
             );
           },
