@@ -228,15 +228,15 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
       }
 
       final newUser = UserModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: DateTime.now().millisecondsSinceEpoch,
         name: _nameController.text,
         email: _emailController.text,
         role: _selectedRole!,
-        unitType: unitType,
+        unitType: unitType ?? 'institutional',
         unitId: unitId,
         unitName: unitName,
-        nikNip: _nikNipController.text.isEmpty ? null : _nikNipController.text,
-        phoneNumber: _phoneController.text.isEmpty ? null : _phoneController.text,
+        nikNip: _nikNipController.text.trim(),
+        phoneNumber: _phoneController.text.trim(),
         createdAt: DateTime.now(),
       );
 

@@ -44,8 +44,14 @@ dependencies:
   # State management
   provider: ^6.1.2
   
-  # HTTP client (untuk future API integration)
-  http: ^1.2.2
+  # HTTP client & API integration
+  dio: ^5.7.0
+  
+  # Local storage untuk token authentication
+  shared_preferences: ^2.3.3
+  
+  # Loading indicator
+  flutter_spinkit: ^5.2.1
 
 dev_dependencies:
   flutter_test:

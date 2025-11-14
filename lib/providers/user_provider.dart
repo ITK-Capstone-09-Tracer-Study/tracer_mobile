@@ -5,7 +5,7 @@ class UserProvider extends ChangeNotifier {
   // Dummy data untuk development
   final List<UserModel> _users = [
     UserModel(
-      id: '1',
+      id: 1,
       name: 'Dr. Budi Santoso, S.T., M.T.',
       email: 'budi.santoso@itk.ac.id',
       role: 'head_of_unit',
@@ -17,7 +17,7 @@ class UserProvider extends ChangeNotifier {
       createdAt: DateTime.now().subtract(const Duration(days: 365)),
     ),
     UserModel(
-      id: '2',
+      id: 2,
       name: 'Siti Rahmawati, S.Kom., M.Kom.',
       email: 'siti.rahmawati@itk.ac.id',
       role: 'major_team',
@@ -29,7 +29,7 @@ class UserProvider extends ChangeNotifier {
       createdAt: DateTime.now().subtract(const Duration(days: 300)),
     ),
     UserModel(
-      id: '3',
+      id: 3,
       name: 'Ahmad Fauzi',
       email: 'ahmad.fauzi@itk.ac.id',
       role: 'tracer_team',
@@ -39,7 +39,7 @@ class UserProvider extends ChangeNotifier {
       createdAt: DateTime.now().subtract(const Duration(days: 200)),
     ),
     UserModel(
-      id: '4',
+      id: 4,
       name: 'Dewi Lestari',
       email: 'dewi.lestari@itk.ac.id',
       role: 'admin',
@@ -49,7 +49,7 @@ class UserProvider extends ChangeNotifier {
       createdAt: DateTime.now().subtract(const Duration(days: 150)),
     ),
     UserModel(
-      id: '5',
+      id: 5,
       name: 'Muhammad Rizki',
       email: 'muhammad.rizki@itk.ac.id',
       role: 'head_of_unit',
@@ -61,7 +61,7 @@ class UserProvider extends ChangeNotifier {
       createdAt: DateTime.now().subtract(const Duration(days: 100)),
     ),
     UserModel(
-      id: '6',
+      id: 6,
       name: 'Putri Amelia',
       email: 'putri.amelia@itk.ac.id',
       role: 'major_team',
@@ -73,7 +73,7 @@ class UserProvider extends ChangeNotifier {
       createdAt: DateTime.now().subtract(const Duration(days: 50)),
     ),
     UserModel(
-      id: '7',
+      id: 7,
       name: 'Dr. Ir. Bambang Supriyanto, M.Eng.',
       email: 'bambang.supriyanto@itk.ac.id',
       role: 'tracer_team',
@@ -104,8 +104,8 @@ class UserProvider extends ChangeNotifier {
              user.email.toLowerCase().contains(query) ||
              user.role.toLowerCase().contains(query) ||
              (user.unitName?.toLowerCase().contains(query) ?? false) ||
-             (user.unitType?.toLowerCase().contains(query) ?? false) ||
-             (user.nikNip?.toLowerCase().contains(query) ?? false);
+             user.unitType.toLowerCase().contains(query) ||
+             user.nikNip.toLowerCase().contains(query);
     }).toList();
   }
 
@@ -122,7 +122,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   // Get user by ID
-  UserModel? getUserById(String id) {
+  UserModel? getUserById(int id) {
     try {
       return _users.firstWhere((user) => user.id == id);
     } catch (e) {
@@ -137,7 +137,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   // Update user
-  void updateUser(String id, UserModel updatedUser) {
+  void updateUser(int id, UserModel updatedUser) {
     final index = _users.indexWhere((user) => user.id == id);
     if (index != -1) {
       _users[index] = updatedUser.copyWith(
@@ -148,7 +148,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   // Delete user
-  void deleteUser(String id) {
+  void deleteUser(int id) {
     _users.removeWhere((user) => user.id == id);
     notifyListeners();
   }
@@ -157,7 +157,7 @@ class UserProvider extends ChangeNotifier {
   Map<String, List<UserModel>> getUsersByUnit() {
     final Map<String, List<UserModel>> grouped = {};
     for (var user in filteredUsers) {
-      final unitKey = user.unitName ?? user.unitType ?? 'No Unit';
+      final unitKey = user.unitName ?? user.unitType;
       if (!grouped.containsKey(unitKey)) {
         grouped[unitKey] = [];
       }

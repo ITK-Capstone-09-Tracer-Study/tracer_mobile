@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../constants/app_constants.dart';
 import '../constants/colors.dart';
+import '../constants/roles.dart';
+import '../providers/auth_provider.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
@@ -12,11 +15,19 @@ class AppDrawer extends StatefulWidget {
 }
 
 class _AppDrawerState extends State<AppDrawer> {
-  bool _isUserDirectoryExpanded = false;
-  bool _isQuestionnaireExpanded = false;
-
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+    final currentUser = authProvider.currentUser;
+    final userRole = currentUser?.role ?? '';
+    
+    // Get user initials for avatar
+    final userName = currentUser?.name ?? 'User';
+    final userInitials = _getInitials(userName);
+    
+    // Get role display name
+    final roleDisplay = RolePermissions.getRoleDisplayName(userRole);
+    
     return Drawer(
       child: SafeArea(
         child: Column(
@@ -61,10 +72,10 @@ class _AppDrawerState extends State<AppDrawer> {
                         color: AppColors.primary,
                         shape: BoxShape.circle,
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
-                          'DU',
-                          style: TextStyle(
+                          userInitials,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -79,14 +90,17 @@ class _AppDrawerState extends State<AppDrawer> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Your Name',
+                            userName,
                             style: Theme.of(context).textTheme.titleMedium,
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '12345',
-                            style: Theme.of(context).textTheme.bodySmall,
+                            roleDisplay,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w500,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ],
@@ -106,71 +120,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 padding: const EdgeInsets.symmetric(
                   vertical: AppConstants.paddingSmall,
                 ),
-                children: [
-                  // User Directory dengan dropdown
-                  Theme(
-                    data: Theme.of(context).copyWith(
-                      dividerColor: Colors.transparent,
-                    ),
-                    child: ExpansionTile(
-                      leading: const Icon(Icons.people_outline),
-                      title: const Text('User Directory'),
-                      trailing: Icon(
-                        _isUserDirectoryExpanded 
-                            ? Icons.keyboard_arrow_up 
-                            : Icons.keyboard_arrow_down,
-                      ),
-                      onExpansionChanged: (expanded) {
-                        setState(() {
-                          _isUserDirectoryExpanded = expanded;
-                        });
-                      },
-                      children: [
-                        _buildSubMenuItem(
-                          context,
-                          icon: Icons.grid_view,
-                          title: 'Unit Directory',
-                          route: '/unit-management',
-                        ),
-                        _buildSubMenuItem(
-                          context,
-                          icon: Icons.person_outline,
-                          title: 'Employee Directory',
-                          route: '/user-management',
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  // Questionnaire dengan dropdown
-                  Theme(
-                    data: Theme.of(context).copyWith(
-                      dividerColor: Colors.transparent,
-                    ),
-                    child: ExpansionTile(
-                      leading: const Icon(Icons.assignment_outlined),
-                      title: const Text('Questionnaire'),
-                      trailing: Icon(
-                        _isQuestionnaireExpanded 
-                            ? Icons.keyboard_arrow_up 
-                            : Icons.keyboard_arrow_down,
-                      ),
-                      onExpansionChanged: (expanded) {
-                        setState(() {
-                          _isQuestionnaireExpanded = expanded;
-                        });
-                      },
-                      children: [
-                        _buildSubMenuItem(
-                          context,
-                          icon: Icons.description_outlined,
-                          title: 'Survey Management',
-                          route: '/survey-management',
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                children: _buildMenuItems(context, userRole),
               ),
             ),
             
@@ -219,6 +169,108 @@ class _AppDrawerState extends State<AppDrawer> {
     );
   }
 
+  /// Get user initials from name
+  String _getInitials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.isEmpty) return 'U';
+    if (parts.length == 1) return parts[0].substring(0, 1).toUpperCase();
+    return '${parts[0].substring(0, 1)}${parts[1].substring(0, 1)}'.toUpperCase();
+  }
+
+  /// Build menu items based on user role
+  List<Widget> _buildMenuItems(BuildContext context, String userRole) {
+    final menus = <Widget>[];
+    
+    // Admin menus
+    if (RolePermissions.hasMenuAccess(userRole, 'user_management') ||
+        RolePermissions.hasMenuAccess(userRole, 'unit_management')) {
+      menus.add(
+        Theme(
+          data: Theme.of(context).copyWith(
+            dividerColor: Colors.transparent,
+          ),
+          child: ExpansionTile(
+            leading: const Icon(Icons.people_outline),
+            title: const Text('User Directory'),
+            children: [
+              if (RolePermissions.hasMenuAccess(userRole, 'unit_management'))
+                _buildSubMenuItem(
+                  context,
+                  icon: Icons.grid_view,
+                  title: 'Unit Directory',
+                  route: '/unit-management',
+                ),
+              if (RolePermissions.hasMenuAccess(userRole, 'user_management'))
+                _buildSubMenuItem(
+                  context,
+                  icon: Icons.person_outline,
+                  title: 'Employee Directory',
+                  route: '/user-management',
+                ),
+            ],
+          ),
+        ),
+      );
+    }
+    
+    // Tracer Team menus
+    if (RolePermissions.hasMenuAccess(userRole, 'survey_management')) {
+      menus.add(
+        Theme(
+          data: Theme.of(context).copyWith(
+            dividerColor: Colors.transparent,
+          ),
+          child: ExpansionTile(
+            leading: const Icon(Icons.assignment_outlined),
+            title: const Text('Questionnaire'),
+            children: [
+              _buildSubMenuItem(
+                context,
+                icon: Icons.description_outlined,
+                title: 'Survey Management',
+                route: '/survey-management',
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    
+    // Major Team menus
+    if (RolePermissions.hasMenuAccess(userRole, 'major_survey_sections')) {
+      menus.add(
+        ListTile(
+          leading: const Icon(Icons.assignment_outlined),
+          title: const Text('Survey Pertanyaan Tambahan'),
+          onTap: () {
+            context.go('/major-survey-sections');
+            Navigator.pop(context);
+          },
+        ),
+      );
+    }
+    
+    // If no menus available, show a message
+    if (menus.isEmpty) {
+      menus.add(
+        const Padding(
+          padding: EdgeInsets.all(AppConstants.paddingLarge),
+          child: Center(
+            child: Text(
+              'No menu available for your role',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    
+    return menus;
+  }
+
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -231,9 +283,17 @@ class _AppDrawerState extends State<AppDrawer> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              context.go('/login');
+              
+              // Call logout from AuthProvider
+              final authProvider = context.read<AuthProvider>();
+              await authProvider.logout();
+              
+              // Navigate to login
+              if (context.mounted) {
+                context.go('/login');
+              }
             },
             style: TextButton.styleFrom(
               foregroundColor: AppColors.error,

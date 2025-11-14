@@ -5,8 +5,16 @@ import 'routes/app_router.dart';
 import 'providers/user_provider.dart';
 import 'providers/unit_provider.dart';
 import 'providers/survey_provider.dart';
+import 'providers/auth_provider.dart';
+import 'services/api_client.dart';
 
-void main() {
+void main() async {
+  // Ensure Flutter binding is initialized
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize API client
+  await ApiClient().initialize();
+  
   runApp(const MyApp());
 }
 
@@ -17,6 +25,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => UnitProvider()),
         ChangeNotifierProvider(create: (_) => SurveyProvider()),

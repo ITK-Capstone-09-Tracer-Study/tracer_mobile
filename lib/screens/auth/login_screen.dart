@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../constants/colors.dart';
 import '../../constants/app_constants.dart';
+import '../../providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -31,30 +33,40 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = true;
       });
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
+      try {
+        // Get AuthProvider
+        final authProvider = context.read<AuthProvider>();
+        
+        // Call real API login
+        final success = await authProvider.login(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
 
-      // Dummy validation - replace with actual authentication
-      final email = _emailController.text.trim();
-      final password = _passwordController.text;
-
-      if (email == 'admin@itk.ac.id' && password == 'admin123') {
-        // Login successful
         if (mounted) {
           setState(() {
             _isLoading = false;
           });
-          context.go('/user-management');
+
+          if (success) {
+            // Login successful - navigate to home
+            context.go('/');
+          } else {
+            // Login failed - show error
+            _showErrorDialog(
+              'Login Failed',
+              authProvider.errorMessage ?? 'The email address or password you entered is incorrect. Please try again.',
+            );
+          }
         }
-      } else {
-        // Login failed
+      } catch (e) {
         if (mounted) {
           setState(() {
             _isLoading = false;
           });
           _showErrorDialog(
             'Login Failed',
-            'The email address or password you entered is incorrect. Please try again.',
+            'An unexpected error occurred: $e',
           );
         }
       }

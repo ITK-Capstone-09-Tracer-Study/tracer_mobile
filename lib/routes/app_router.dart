@@ -37,7 +37,8 @@ class AppRouter {
             path: 'detail/:userId',
             name: 'user-detail',
             builder: (context, state) {
-              final userId = state.pathParameters['userId']!;
+              final userIdStr = state.pathParameters['userId']!;
+              final userId = int.parse(userIdStr);
               return UserDetailScreen(userId: userId);
             },
           ),

@@ -470,7 +470,7 @@ class _AddPeriodeDialogState extends State<_AddPeriodeDialog> {
     if (_formKey.currentState!.validate()) {
       final year = int.parse(_yearController.text);
       final periode = PeriodeModel(
-        id: 'p${year}',
+        id: 'p$year',
         name: 'Periode $year',
         year: year,
         createdAt: DateTime.now(),

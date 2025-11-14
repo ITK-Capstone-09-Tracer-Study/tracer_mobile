@@ -7,7 +7,7 @@ import '../../constants/colors.dart';
 import '../../constants/app_constants.dart';
 
 class UserDetailScreen extends StatefulWidget {
-  final String userId;
+  final int userId;
   
   const UserDetailScreen({
     super.key,
@@ -53,8 +53,8 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
   void _loadUserData(UserModel user) {
     _nameController.text = user.name;
     _emailController.text = user.email;
-    _nikNipController.text = user.nikNip ?? '';
-    _phoneController.text = user.phoneNumber ?? '';
+    _nikNipController.text = user.nikNip;
+    _phoneController.text = user.phoneNumber;
     // Ensure role is valid, default to 'admin' if not in the list
     _selectedRole = AppConstants.userRoles.contains(user.role) 
         ? user.role 
@@ -293,7 +293,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                 
                 // Role Dropdown
                 DropdownButtonFormField<String>(
-                  value: _selectedRole,
+                  initialValue: _selectedRole,
                   decoration: const InputDecoration(
                     labelText: 'Role',
                     prefixIcon: Icon(Icons.work_outline),
