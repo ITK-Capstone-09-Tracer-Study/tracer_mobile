@@ -593,7 +593,7 @@ class _QuestionCardState extends State<_QuestionCard> {
               children: [
                 Radio<int>(
                   value: index,
-                  groupValue: -1,
+                  groupValue: -1, // ignore: deprecated_member_use
                   onChanged: widget.showPreview ? null : (_) {}, // ignore: deprecated_member_use
                 ),
                 Expanded(
@@ -716,7 +716,7 @@ class _QuestionCardState extends State<_QuestionCard> {
                 children: List.generate(max - min + 1, (index) {
                   return Radio<int>(
                     value: min + index,
-                    groupValue: -1,
+                    groupValue: -1, // ignore: deprecated_member_use
                     onChanged: widget.showPreview ? null : (_) {}, // ignore: deprecated_member_use
                   );
                 }),

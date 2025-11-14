@@ -150,7 +150,7 @@ class _SurveyManagementScreenState extends State<SurveyManagementScreen> {
                         periode,
                         surveyProvider.getSurveysByPeriode(periode.year.toString()),
                       );
-                    }).toList(),
+                    }),
 
                     // Add Periode Button (in edit mode)
                     if (_isEditMode) ...[
@@ -162,7 +162,7 @@ class _SurveyManagementScreenState extends State<SurveyManagementScreen> {
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           side: BorderSide(
-                            color: AppColors.primary.withOpacity(0.5),
+                            color: AppColors.primary.withValues(alpha: 0.5),
                             style: BorderStyle.solid,
                             width: 2,
                           ),
