@@ -19,6 +19,14 @@ class _SurveyManagementScreenState extends State<SurveyManagementScreen> {
   bool _isEditMode = false;
   String? _expandedPeriodeId;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<SurveyProvider>(context, listen: false).initialize();
+    });
+  }
+
   void _toggleEditMode() {
     setState(() {
       _isEditMode = !_isEditMode;
