@@ -130,11 +130,23 @@ class AuthService {
   /// POST /auth/logout
   Future<ApiResponse<void>> logout() async {
     try {
+      if (kDebugMode) {
+        debugPrint('🚪 Calling logout API...');
+      }
+      
       final response = await _apiClient.dio.post('/auth/logout');
+
+      if (kDebugMode) {
+        debugPrint('📥 Logout response: ${response.statusCode}');
+      }
 
       if (response.statusCode == 200) {
         // Remove token
         await _apiClient.removeAuthToken();
+        
+        if (kDebugMode) {
+          debugPrint('✅ Token removed successfully');
+        }
         
         return ApiResponse.success(
           data: null,
@@ -148,15 +160,28 @@ class AuthService {
         statusCode: response.statusCode,
       );
     } on DioException catch (e) {
+      if (kDebugMode) {
+        debugPrint('⚠️ Logout API error: ${e.message}');
+      }
+      
       // Even if logout fails on server, remove token locally
       await _apiClient.removeAuthToken();
+      
+      if (kDebugMode) {
+        debugPrint('✅ Token removed locally despite API error');
+      }
       
       return ApiResponse.error(
         message: e.response?.data['message'] ?? 'Logout failed',
         statusCode: e.response?.statusCode,
       );
     } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ Unexpected logout error: $e');
+      }
+      
       await _apiClient.removeAuthToken();
+      
       return ApiResponse.error(
         message: 'An unexpected error occurred',
       );

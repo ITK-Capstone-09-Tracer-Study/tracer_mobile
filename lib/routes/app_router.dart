@@ -7,21 +7,78 @@ import '../screens/user_management/user_detail_screen.dart';
 import '../screens/user_management/new_employee_screen.dart';
 import '../screens/unit_management/unit_management_screen.dart';
 import '../screens/survey_management/survey_management_screen.dart';
+import '../screens/public/public_home_screen.dart';
+import '../screens/public/faq_screen.dart';
+import '../screens/public/alumni_verification_screen.dart';
+import '../screens/public/alumni_employment_screen.dart';
+import '../screens/public/available_surveys_screen.dart';
+import '../providers/auth_provider.dart';
 
 class AppRouter {
-  static final GoRouter router = GoRouter(
-    initialLocation: '/login',
-    debugLogDiagnostics: true,
-    routes: [
-      // Login route
+  static GoRouter createRouter(AuthProvider authProvider) {
+    return GoRouter(
+      initialLocation: '/',
+      debugLogDiagnostics: true,
+      refreshListenable: authProvider, // Listen to auth changes
+      redirect: (context, state) {
+        final isAuthenticated = authProvider.isAuthenticated;
+        final isLoggingIn = state.uri.path == '/login';
+        final isPublicRoute = state.uri.path == '/' || 
+                              state.uri.path.startsWith('/isi-kuesioner') ||
+                              state.uri.path.startsWith('/alumni-employment') ||
+                              state.uri.path.startsWith('/available-surveys') ||
+                              state.uri.path.startsWith('/faq');
+        
+        // If not authenticated and trying to access protected route
+        if (!isAuthenticated && !isLoggingIn && !isPublicRoute) {
+          return '/';
+        }
+        
+        // No redirect needed
+        return null;
+      },
+      routes: [
+      // Public routes (not authenticated)
+      GoRoute(
+        path: '/',
+        name: 'public-home',
+        builder: (context, state) => const PublicHomeScreen(),
+      ),
+      
+      GoRoute(
+        path: '/isi-kuesioner',
+        name: 'isi-kuesioner',
+        builder: (context, state) => const AlumniVerificationScreen(),
+      ),
+      
+      GoRoute(
+        path: '/alumni-employment',
+        name: 'alumni-employment',
+        builder: (context, state) => const AlumniEmploymentScreen(),
+      ),
+      
+      GoRoute(
+        path: '/available-surveys',
+        name: 'available-surveys',
+        builder: (context, state) => const AvailableSurveysScreen(),
+      ),
+      
+      GoRoute(
+        path: '/faq',
+        name: 'faq',
+        builder: (context, state) => const FAQScreen(),
+      ),
+      
+      // Admin Login route
       GoRoute(
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginScreen(),
       ),
       
+      // Authenticated routes (admin/staff)
       GoRoute(
-        path: '/',
+        path: '/home',
         name: 'home',
         builder: (context, state) => const HomeScreen(),
       ),
@@ -94,5 +151,6 @@ class AppRouter {
         ),
       ),
     ),
-  );
+    );
+  }
 }

@@ -13,10 +13,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       toolbarHeight: 70,
-      title: SvgPicture.asset(
-        AppConstants.logoPath,
-        height: 40,
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SvgPicture.asset(
+            AppConstants.logoPath,
+            height: 40,
+          ),
+        ],
       ),
+      centerTitle: false,
       elevation: 1,
       actions: [
         IconButton(

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -149,7 +150,6 @@ class _AppDrawerState extends State<AppDrawer> {
                   borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
                 ),
                 onTap: () {
-                  Navigator.pop(context); // Close drawer
                   _showLogoutDialog(context);
                 },
               ),
@@ -274,30 +274,59 @@ class _AppDrawerState extends State<AppDrawer> {
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Logout'),
         content: const Text('Are you sure you want to logout?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context);
+              debugPrint('🔴 Logout button pressed');
               
-              // Call logout from AuthProvider
-              final authProvider = context.read<AuthProvider>();
-              await authProvider.logout();
+              // Get AuthProvider BEFORE any async operations
+              final authProvider = Provider.of<AuthProvider>(context, listen: false);
               
-              // Navigate to login
-              if (context.mounted) {
-                context.go('/login');
+              // Close dialog first
+              Navigator.pop(dialogContext);
+              debugPrint('✅ Dialog closed');
+              
+              try {
+                // Show loading
+                if (context.mounted) {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (loadingContext) => const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                  debugPrint('✅ Loading indicator shown');
+                }
+                
+                // Call logout from AuthProvider
+                await authProvider.logout();
+                debugPrint('✅ Logout completed');
+                
+                // Close loading and navigate
+                if (context.mounted) {
+                  Navigator.of(context).pop(); // Close loading
+                  debugPrint('✅ Loading indicator closed');
+                  
+                  // Navigate to public home
+                  context.go('/');
+                  debugPrint('✅ Navigated to public home');
+                }
+              } catch (e) {
+                debugPrint('❌ Logout error: $e');
+                // Try to close loading if it's open
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                }
               }
             },
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.error,
-            ),
             child: const Text('Logout'),
           ),
         ],

@@ -49,8 +49,8 @@ class _LoginScreenState extends State<LoginScreen> {
           });
 
           if (success) {
-            // Login successful - navigate to home
-            context.go('/');
+            // Login successful - navigate to admin home
+            context.go('/home');
           } else {
             // Login failed - show error
             _showErrorDialog(

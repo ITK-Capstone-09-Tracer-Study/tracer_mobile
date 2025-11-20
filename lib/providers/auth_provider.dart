@@ -136,13 +136,24 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      debugPrint('🚪 Logging out user: ${_currentUser?.email}');
+      
       await _authService.logout();
+      
       _currentUser = null;
       _isAuthenticated = false;
       _errorMessage = null;
       _loginEmail = null;
+      
+      debugPrint('✅ Logout successful, state cleared');
     } catch (e) {
+      debugPrint('❌ Logout error: $e');
       _errorMessage = 'Failed to logout: $e';
+      
+      // Even if API call fails, clear local state
+      _currentUser = null;
+      _isAuthenticated = false;
+      _loginEmail = null;
     } finally {
       _isLoading = false;
       notifyListeners();

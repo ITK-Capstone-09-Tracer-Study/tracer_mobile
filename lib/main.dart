@@ -30,11 +30,18 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => UnitProvider()),
         ChangeNotifierProvider(create: (_) => SurveyProvider()),
       ],
-      child: MaterialApp.router(
-        title: 'Tracer Study ITK',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.theme,
-        routerConfig: AppRouter.router,
+      child: Builder(
+        builder: (context) {
+          // Get AuthProvider from context to pass to router
+          final authProvider = context.read<AuthProvider>();
+          
+          return MaterialApp.router(
+            title: 'Tracer Study ITK',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.theme,
+            routerConfig: AppRouter.createRouter(authProvider),
+          );
+        },
       ),
     );
   }
