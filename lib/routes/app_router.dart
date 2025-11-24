@@ -7,6 +7,9 @@ import '../screens/user_management/user_detail_screen.dart';
 import '../screens/user_management/new_employee_screen.dart';
 import '../screens/unit_management/unit_management_screen.dart';
 import '../screens/survey_management/survey_management_screen.dart';
+import '../screens/survey_management/survey_form_screen.dart';
+import '../screens/survey_kinds/survey_kinds_screen.dart';
+import '../screens/survey_kinds/survey_kind_form_screen.dart';
 import '../screens/public/public_home_screen.dart';
 import '../screens/public/faq_screen.dart';
 import '../screens/public/alumni_verification_screen.dart';
@@ -114,10 +117,54 @@ class AppRouter {
         builder: (context, state) => const UnitManagementScreen(),
       ),
 
+      // Survey Management routes with nested routes
       GoRoute(
         path: '/survey-management',
         name: 'survey-management',
         builder: (context, state) => const SurveyManagementScreen(),
+        routes: [
+          // Create new survey
+          GoRoute(
+            path: 'create',
+            name: 'survey-create',
+            builder: (context, state) => const SurveyFormScreen(),
+          ),
+          // Edit survey
+          GoRoute(
+            path: 'edit/:surveyId',
+            name: 'survey-edit',
+            builder: (context, state) {
+              final surveyIdStr = state.pathParameters['surveyId']!;
+              final surveyId = int.parse(surveyIdStr);
+              return SurveyFormScreen(surveyId: surveyId);
+            },
+          ),
+        ],
+      ),
+
+      // Survey Kinds routes
+      GoRoute(
+        path: '/survey-kinds',
+        name: 'survey-kinds',
+        builder: (context, state) => const SurveyKindsScreen(),
+        routes: [
+          // Create new survey kind
+          GoRoute(
+            path: 'create',
+            name: 'survey-kind-create',
+            builder: (context, state) => const SurveyKindFormScreen(),
+          ),
+          // Edit survey kind
+          GoRoute(
+            path: 'edit/:surveyKindId',
+            name: 'survey-kind-edit',
+            builder: (context, state) {
+              final surveyKindIdStr = state.pathParameters['surveyKindId']!;
+              final surveyKindId = int.parse(surveyKindIdStr);
+              return SurveyKindFormScreen(surveyKindId: surveyKindId);
+            },
+          ),
+        ],
       ),
     ],
     

@@ -1,4 +1,5 @@
 /// Constants untuk User Roles dan Permissions
+library;
 
 /// User Roles sesuai dengan API
 class UserRole {

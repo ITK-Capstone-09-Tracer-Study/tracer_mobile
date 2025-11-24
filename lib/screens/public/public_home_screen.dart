@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import '../../constants/app_constants.dart';
 import '../../constants/colors.dart';
 import '../../widgets/public_drawer.dart';
@@ -156,7 +157,7 @@ class PublicHomeScreen extends StatelessWidget {
                         const SizedBox(height: 16),
                         ElevatedButton.icon(
                           onPressed: () {
-                            Navigator.pushNamed(context, '/isi-kuesioner');
+                            context.go('/isi-kuesioner');
                           },
                           icon: const Icon(Icons.arrow_forward),
                           label: const Text('Mulai Isi Kuesioner'),

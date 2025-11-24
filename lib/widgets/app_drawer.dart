@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -222,8 +221,14 @@ class _AppDrawerState extends State<AppDrawer> {
           ),
           child: ExpansionTile(
             leading: const Icon(Icons.assignment_outlined),
-            title: const Text('Questionnaire'),
+            title: const Text('Survey'),
             children: [
+              _buildSubMenuItem(
+                context,
+                icon: Icons.category_outlined,
+                title: 'Survey Kinds',
+                route: '/survey-kinds',
+              ),
               _buildSubMenuItem(
                 context,
                 icon: Icons.description_outlined,

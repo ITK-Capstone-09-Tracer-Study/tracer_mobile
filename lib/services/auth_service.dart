@@ -8,6 +8,63 @@ import 'api_response.dart';
 class AuthService {
   final ApiClient _apiClient = ApiClient();
 
+  /// Development bypass credentials (for testing when backend is unavailable)
+  static const Map<String, Map<String, dynamic>> _devBypassAccounts = {
+    'tracerteam@itk.ac.id': {
+      'password': 'password',
+      'role': 'tracer_team',
+      'name': 'Tim Tracer',
+      'unit_type': 'institutional',
+    },
+    'majorteam@itk.ac.id': {
+      'password': 'password',
+      'role': 'major_team',
+      'name': 'Tim Prodi',
+      'unit_type': 'major',
+    },
+    'headunit@itk.ac.id': {
+      'password': 'password',
+      'role': 'head_of_unit',
+      'name': 'Kepala Unit',
+      'unit_type': 'institutional',
+    },
+  };
+
+  /// Check if email is a development bypass account
+  bool _isDevBypassAccount(String email) {
+    return kDebugMode && _devBypassAccounts.containsKey(email);
+  }
+
+  /// Create mock login response for dev bypass
+  ApiResponse<Map<String, dynamic>> _createDevBypassResponse(String email, String password) {
+    final account = _devBypassAccounts[email];
+    if (account == null || account['password'] != password) {
+      return ApiResponse.error(
+        message: 'Invalid email or password',
+        statusCode: 401,
+      );
+    }
+
+    // Create mock token (base64 encoded email for uniqueness)
+    final mockToken = 'dev_bypass_${email.replaceAll('@', '_').replaceAll('.', '_')}_${DateTime.now().millisecondsSinceEpoch}';
+
+    return ApiResponse.success(
+      data: {
+        'token': mockToken,
+        'user': {
+          'id': email.hashCode.abs(),
+          'email': email,
+          'role': account['role'],
+          'name': account['name'],
+          'unit_type': account['unit_type'],
+          'nik_nip': '000000000',
+          'phone_number': '081234567890',
+        },
+      },
+      message: 'Login successful (DEV BYPASS)',
+    );
+  }
+
   /// Login user
   /// POST /auth/login
   /// Body: { "email": "string", "password": "string" }
@@ -20,6 +77,17 @@ class AuthService {
       if (kDebugMode) {
         debugPrint('🔐 Attempting login for: $email');
         debugPrint('🌐 Base URL: ${ApiClient.baseUrl}');
+      }
+
+      // Check for development bypass accounts
+      if (_isDevBypassAccount(email)) {
+        debugPrint('🔧 Using DEV BYPASS for: $email');
+        final bypassResponse = _createDevBypassResponse(email, password);
+        if (bypassResponse.success) {
+          // Save the bypass token
+          await _apiClient.setAuthToken(bypassResponse.data!['token'] as String);
+        }
+        return bypassResponse;
       }
       
       final response = await _apiClient.dio.post(

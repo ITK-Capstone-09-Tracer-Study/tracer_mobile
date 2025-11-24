@@ -22,7 +22,7 @@ class SurveyDetailProvider extends ChangeNotifier {
   void loadSurvey(SurveyModel survey) {
     _currentSurvey = survey;
     _surveyTitle = survey.title;
-    _surveyDescription = survey.description ?? '';
+    _surveyDescription = survey.description;
     
     // Load questions (dummy for now)
     _questions.clear();

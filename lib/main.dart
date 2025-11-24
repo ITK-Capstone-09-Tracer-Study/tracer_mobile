@@ -5,6 +5,7 @@ import 'routes/app_router.dart';
 import 'providers/user_provider.dart';
 import 'providers/unit_provider.dart';
 import 'providers/survey_provider.dart';
+import 'providers/survey_kind_provider.dart';
 import 'providers/auth_provider.dart';
 import 'services/api_client.dart';
 
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => UnitProvider()),
         ChangeNotifierProvider(create: (_) => SurveyProvider()),
+        ChangeNotifierProvider(create: (_) => SurveyKindProvider()),
       ],
       child: Builder(
         builder: (context) {

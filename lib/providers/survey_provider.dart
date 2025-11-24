@@ -2,68 +2,34 @@ import 'package:flutter/material.dart';
 import '../models/survey_model.dart';
 import '../services/survey_service.dart';
 
+/// Provider untuk Survey Management (New Structure)
 class SurveyProvider extends ChangeNotifier {
   final SurveyService _surveyService = SurveyService();
   
-  List<SurveyModel> _templateSurveys = [];
-  List<PeriodeModel> _periodes = [];
-  List<SurveyModel> _periodeSurveys = [];
-  
+  List<SurveyModel> _surveys = [];
   bool _isLoading = false;
   String? _errorMessage;
 
-  List<SurveyModel> get templateSurveys => _templateSurveys;
-  List<PeriodeModel> get periodes => _periodes;
-  List<SurveyModel> get periodeSurveys => _periodeSurveys;
+  List<SurveyModel> get surveys => _surveys;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  /// Initialize and fetch data
+  /// Initialize - Fetch surveys from API
   Future<void> initialize() async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      // Fetch Survey Kinds (Templates)
-      final kindsResponse = await _surveyService.getSurveyKinds();
-      if (kindsResponse.success && kindsResponse.data != null) {
-        // Convert SurveyKindModel to SurveyModel (as templates)
-        _templateSurveys = kindsResponse.data!.map((kind) => SurveyModel(
-          id: 'kind_${kind.id}',
-          dbId: kind.id,
-          title: kind.name,
-          type: kind.name,
-          lastEdited: kind.updatedAt ?? DateTime.now(),
-          description: kind.description,
-          isTemplate: true,
-          isActive: kind.isActive,
-          surveyKindId: kind.id,
-        )).toList();
-      }
-
-      // Fetch Surveys
-      final surveysResponse = await _surveyService.getSurveys();
-      if (surveysResponse.success && surveysResponse.data != null) {
-        _periodeSurveys = surveysResponse.data!;
-        
-        // Extract unique years to create Periodes
-        final years = _periodeSurveys
-            .map((s) => s.periode)
-            .where((p) => p != null)
-            .map((p) => int.tryParse(p!))
-            .where((y) => y != null)
-            .toSet()
-            .toList();
-            
-        years.sort((a, b) => b!.compareTo(a!)); // Sort descending
-        
-        _periodes = years.map((year) => PeriodeModel(
-          id: year.toString(),
-          name: 'Periode $year',
-          year: year!,
-          createdAt: DateTime.now(), // We don't have this info from API grouping
-        )).toList();
+      final response = await _surveyService.getSurveys(
+        perPage: 100,
+      );
+      
+      if (response.success && response.data != null) {
+        _surveys = response.data!;
+        _errorMessage = null;
+      } else {
+        _errorMessage = response.message;
       }
     } catch (e) {
       _errorMessage = 'Failed to load surveys: $e';
@@ -73,68 +39,114 @@ class SurveyProvider extends ChangeNotifier {
     }
   }
 
-  // Get surveys by periode
-  List<SurveyModel> getSurveysByPeriode(String periode) {
-    return _periodeSurveys
-        .where((survey) => survey.periode == periode)
-        .toList();
-  }
-
-  // Add new periode (Create surveys for a year)
-  Future<void> addPeriode(PeriodeModel periode) async {
+  /// Create new survey
+  Future<bool> createSurvey(Map<String, dynamic> data) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
-    
+
     try {
-      // For each template (SurveyKind), create a new Survey for this year
-      for (var template in _templateSurveys) {
-        if (template.surveyKindId != null) {
-          await _surveyService.createSurvey({
-            'name': template.title,
-            'survey_kind_id': template.surveyKindId,
-            'year': periode.year,
-            'description': template.description,
-            'is_active': true,
-            'sections': [], // Empty sections initially
-          });
-        }
+      final response = await _surveyService.createSurvey(data);
+      
+      if (response.success && response.data != null) {
+        _surveys.add(response.data!);
+        _errorMessage = null;
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = response.message;
+        _isLoading = false;
+        notifyListeners();
+        return false;
       }
-      
-      // Refresh data
-      await initialize();
-      
     } catch (e) {
-      _errorMessage = 'Failed to create surveys for periode: $e';
-      // Fallback: add locally so UI updates even if API fails (for demo/testing)
-      _periodes.add(periode);
-    } finally {
+      _errorMessage = 'Failed to create survey: $e';
       _isLoading = false;
       notifyListeners();
-    }
-  }
-  
-  // Update periode name
-  void updatePeriode(String id, PeriodeModel updatedPeriode) {
-    final index = _periodes.indexWhere((p) => p.id == id);
-    if (index != -1) {
-      _periodes[index] = updatedPeriode;
-      notifyListeners();
+      return false;
     }
   }
 
-  // Delete periode
-  Future<void> deletePeriode(String periodeId) async {
-    // Delete all surveys in this periode
-    final surveysToDelete = _periodeSurveys.where((s) => s.periode == periodeId).toList();
-    
-    for (var survey in surveysToDelete) {
-      if (survey.dbId != null) {
-        await _surveyService.deleteSurvey(survey.dbId!);
-      }
-    }
-    
-    _periodes.removeWhere((p) => p.id == periodeId);
-    _periodeSurveys.removeWhere((s) => s.periode == periodeId);
+  /// Update existing survey
+  Future<bool> updateSurvey(int id, Map<String, dynamic> data) async {
+    _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
+
+    try {
+      final response = await _surveyService.updateSurvey(id, data);
+      
+      if (response.success && response.data != null) {
+        final index = _surveys.indexWhere((s) => s.id == id);
+        if (index != -1) {
+          _surveys[index] = response.data!;
+        }
+        _errorMessage = null;
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = response.message;
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'Failed to update survey: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Delete survey
+  Future<bool> deleteSurvey(int id) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _surveyService.deleteSurvey(id);
+      
+      if (response.success) {
+        _surveys.removeWhere((s) => s.id == id);
+        _errorMessage = null;
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _errorMessage = response.message;
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'Failed to delete survey: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Get survey by ID
+  SurveyModel? getSurveyById(int id) {
+    try {
+      return _surveys.firstWhere((s) => s.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Filter surveys (for search functionality)
+  List<SurveyModel> filterSurveys(String query) {
+    if (query.isEmpty) return _surveys;
+    
+    final lowerQuery = query.toLowerCase();
+    return _surveys.where((survey) {
+      return survey.title.toLowerCase().contains(lowerQuery) ||
+             survey.kindName.toLowerCase().contains(lowerQuery) ||
+             survey.graduationNumber.toString().contains(lowerQuery);
+    }).toList();
   }
 }

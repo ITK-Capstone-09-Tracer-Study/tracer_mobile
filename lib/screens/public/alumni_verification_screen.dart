@@ -67,7 +67,7 @@ class _AlumniVerificationScreenState extends State<AlumniVerificationScreen> {
       _isLoading = true;
     });
     
-    // TODO: Call API untuk verifikasi alumni
+    // TODO: Call API untuk verifikasi alumni (dartdoc)
     // Endpoint akan ditentukan berdasarkan api.json
     
     await Future.delayed(const Duration(seconds: 2)); // Simulasi API call
@@ -87,15 +87,9 @@ class _AlumniVerificationScreenState extends State<AlumniVerificationScreen> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 70,
-        title: Row(
-          children: [
-            SvgPicture.asset(
-              AppConstants.logoPath,
-              height: 35,
-            ),
-            const SizedBox(width: 12),
-            const Text('Isi Kuesioner'),
-          ],
+        title: SvgPicture.asset(
+          AppConstants.logoPath,
+          height: 35,
         ),
         elevation: 1,
       ),
@@ -166,7 +160,7 @@ class _AlumniVerificationScreenState extends State<AlumniVerificationScreen> {
                         // Jurusan
                         _buildLabel('Jurusan', isRequired: true),
                         DropdownButtonFormField<String>(
-                          value: _selectedMajor,
+                          initialValue: _selectedMajor,
                           decoration: _buildInputDecoration('-- Pilih Jurusan --'),
                           items: const [
                             DropdownMenuItem(value: 'TI', child: Text('Teknik Informatika')),

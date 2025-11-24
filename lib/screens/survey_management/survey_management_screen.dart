@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../widgets/app_drawer.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../providers/survey_provider.dart';
 import '../../models/survey_model.dart';
-import '../../constants/app_constants.dart';
 import '../../constants/colors.dart';
-import 'survey_detail_screen.dart';
+import '../../constants/app_constants.dart';
 
 class SurveyManagementScreen extends StatefulWidget {
   const SurveyManagementScreen({super.key});
@@ -16,8 +16,8 @@ class SurveyManagementScreen extends StatefulWidget {
 }
 
 class _SurveyManagementScreenState extends State<SurveyManagementScreen> {
-  bool _isEditMode = false;
-  String? _expandedPeriodeId;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -27,59 +27,10 @@ class _SurveyManagementScreenState extends State<SurveyManagementScreen> {
     });
   }
 
-  void _toggleEditMode() {
-    setState(() {
-      _isEditMode = !_isEditMode;
-    });
-  }
-
-  void _showAddPeriodeDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => _AddPeriodeDialog(),
-    );
-  }
-
-  void _showEditPeriodeDialog(PeriodeModel periode) {
-    showDialog(
-      context: context,
-      builder: (context) => _EditPeriodeDialog(periode: periode),
-    );
-  }
-
-  void _showDeletePeriodeConfirmation(PeriodeModel periode) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Hapus Periode?'),
-        content: Text(
-          'Apakah Anda yakin ingin menghapus ${periode.name}? '
-          'Semua survey dalam periode ini akan ikut terhapus.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              context.read<SurveyProvider>().deletePeriode(periode.id);
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${periode.name} berhasil dihapus'),
-                  backgroundColor: AppColors.success,
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-            ),
-            child: const Text('Hapus'),
-          ),
-        ],
-      ),
-    );
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -90,9 +41,20 @@ class _SurveyManagementScreenState extends State<SurveyManagementScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Page Title & Actions
-          Padding(
-            padding: const EdgeInsets.all(AppConstants.paddingLarge),
+          // Header Section
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
             child: Row(
               children: [
                 Expanded(
@@ -100,7 +62,7 @@ class _SurveyManagementScreenState extends State<SurveyManagementScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Questionnaire',
+                        'Survey',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -115,530 +77,365 @@ class _SurveyManagementScreenState extends State<SurveyManagementScreen> {
                     ],
                   ),
                 ),
-                // Edit/Done Button
-                if (_isEditMode)
-                  TextButton.icon(
-                    onPressed: _toggleEditMode,
-                    icon: const Icon(Icons.check, size: 18),
-                    label: const Text('Done'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.success,
-                    ),
-                  )
-                else
-                  TextButton.icon(
-                    onPressed: _toggleEditMode,
-                    icon: const Icon(Icons.edit, size: 18),
-                    label: const Text('Edit'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.primary,
+                ElevatedButton.icon(
+                  onPressed: () {
+                    context.push('/survey-management/create');
+                  },
+                  icon: const Icon(Icons.add, size: 20),
+                  label: const Text('New Survey'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
                     ),
                   ),
+                ),
               ],
             ),
           ),
 
-          // Content
+          // Search Bar
+          Padding(
+            padding: const EdgeInsets.all(AppConstants.paddingMedium),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search surveys...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.border),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+            ),
+          ),
+
+          // Survey Table
           Expanded(
             child: Consumer<SurveyProvider>(
-              builder: (context, surveyProvider, child) {
-                return ListView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppConstants.paddingLarge,
-                  ),
-                  children: [
-                    // Template Section
-                    _buildTemplateSection(surveyProvider),
-                    
-                    const SizedBox(height: AppConstants.paddingXLarge),
-                    
-                    // Periodes Section
-                    ...surveyProvider.periodes.map((periode) {
-                      return _buildPeriodeSection(
-                        periode,
-                        surveyProvider.getSurveysByPeriode(periode.year.toString()),
-                      );
-                    }),
+              builder: (context, provider, child) {
+                if (provider.isLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
 
-                    // Add Periode Button (in edit mode)
-                    if (_isEditMode) ...[
-                      const SizedBox(height: AppConstants.paddingLarge),
-                      OutlinedButton.icon(
-                        onPressed: _showAddPeriodeDialog,
-                        icon: const Icon(Icons.add),
-                        label: const Text('Tambah Periode Baru'),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          side: BorderSide(
-                            color: AppColors.primary.withValues(alpha: 0.5),
-                            style: BorderStyle.solid,
-                            width: 2,
+                if (provider.errorMessage != null) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: Colors.red[300],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          provider.errorMessage!,
+                          style: TextStyle(
+                            color: Colors.red[700],
+                            fontSize: 16,
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => provider.initialize(),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
 
-                    const SizedBox(height: AppConstants.paddingXLarge),
+                final surveys = provider.filterSurveys(_searchQuery);
+
+                if (surveys.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.inbox_outlined,
+                          size: 64,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          _searchQuery.isEmpty
+                              ? 'No surveys found'
+                              : 'No matching surveys',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return _buildSurveyTable(surveys);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSurveyTable(List<SurveyModel> surveys) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: SingleChildScrollView(
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: AppColors.border),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          margin: const EdgeInsets.all(AppConstants.paddingMedium),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Table Header
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  border: Border(
+                    bottom: BorderSide(color: AppColors.border, width: 2),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    _buildHeaderCell('Kind', width: 180),
+                    _buildHeaderCell('Graduation Number', width: 150),
+                    _buildHeaderCell('Title', width: 300),
+                    _buildHeaderCell('Started At', width: 180),
+                    _buildHeaderCell('Ended At', width: 180),
+                    _buildHeaderCell('Actions', width: 100),
                   ],
-                );
-              },
-            ),
+                ),
+              ),
+
+              // Table Rows
+              ...surveys.map((survey) => _buildSurveyRow(survey)),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildTemplateSection(SurveyProvider provider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Template',
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: AppConstants.paddingMedium),
-        
-        // Template Survey Cards (2x2 Grid on mobile)
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1.1,
-          ),
-          itemCount: provider.templateSurveys.length,
-          itemBuilder: (context, index) {
-            final survey = provider.templateSurveys[index];
-            return _buildSurveyCard(survey, isTemplate: true);
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPeriodeSection(PeriodeModel periode, List<SurveyModel> surveys) {
-    final isExpanded = _expandedPeriodeId == periode.id;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Periode Header
-        InkWell(
-          onTap: () {
-            setState(() {
-              _expandedPeriodeId = isExpanded ? null : periode.id;
-            });
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.paddingMedium,
-              vertical: AppConstants.paddingSmall,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              border: Border.all(color: AppColors.border),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    periode.name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                
-                // Edit Mode Actions
-                if (_isEditMode) ...[
-                  IconButton(
-                    icon: const Icon(Icons.edit, size: 18),
-                    onPressed: () => _showEditPeriodeDialog(periode),
-                    tooltip: 'Edit Periode',
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.delete, size: 18),
-                    onPressed: () => _showDeletePeriodeConfirmation(periode),
-                    color: AppColors.error,
-                    tooltip: 'Hapus Periode',
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-                
-                Icon(
-                  isExpanded 
-                      ? Icons.keyboard_arrow_up 
-                      : Icons.keyboard_arrow_down,
-                  size: 20,
-                ),
-              ],
-            ),
-          ),
-        ),
-        
-        // Periode Surveys (Collapsible)
-        if (isExpanded) ...[
-          const SizedBox(height: AppConstants.paddingMedium),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 1.1,
-            ),
-            itemCount: surveys.length,
-            itemBuilder: (context, index) {
-              final survey = surveys[index];
-              return _buildSurveyCard(survey);
-            },
-          ),
-        ],
-        
-        const SizedBox(height: AppConstants.paddingLarge),
-      ],
-    );
-  }
-
-  Widget _buildSurveyCard(SurveyModel survey, {bool isTemplate = false}) {
+  Widget _buildHeaderCell(String title, {required double width}) {
     return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.border),
+      width: width,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+          fontSize: 14,
+        ),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            // Navigate to survey detail
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SurveyDetailScreen(survey: survey),
-              ),
-            );
-          },
-          borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Card content area (placeholder for survey preview)
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 8),
-                
-                // Survey Title
-                Text(
-                  survey.title,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                
-                const SizedBox(height: 4),
-                
-                // Last Edited Date
-                Text(
-                  'Last Edited ${_formatDate(survey.lastEdited)}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                
-                // More Options Button
-                if (!isTemplate)
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: IconButton(
-                      icon: const Icon(Icons.more_vert, size: 18),
-                      onPressed: () {
-                        _showSurveyOptions(survey);
-                      },
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ),
-              ],
-            ),
+    );
+  }
+
+  Widget _buildSurveyRow(SurveyModel survey) {
+    // Format datetime manually
+    String formatDateTime(DateTime dt) {
+      return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year} '
+             '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    }
+    
+    return InkWell(
+      onTap: () {
+        context.push('/survey-management/edit/${survey.id}');
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: AppColors.border, width: 1),
           ),
         ),
+        child: Row(
+          children: [
+            // Kind
+            _buildDataCell(
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  survey.kindName,
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              width: 180,
+            ),
+
+            // Graduation Number
+            _buildDataCell(
+              Text(
+                survey.graduationNumber.toString(),
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 14,
+                ),
+              ),
+              width: 150,
+            ),
+
+            // Title
+            _buildDataCell(
+              Text(
+                survey.title,
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              width: 300,
+            ),
+
+            // Started At
+            _buildDataCell(
+              Text(
+                formatDateTime(survey.startedAt),
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                ),
+              ),
+              width: 180,
+            ),
+
+            // Ended At
+            _buildDataCell(
+              Text(
+                formatDateTime(survey.endedAt),
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                ),
+              ),
+              width: 180,
+            ),
+
+            // Actions
+            _buildDataCell(
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      size: 20,
+                      color: AppColors.primary,
+                    ),
+                    onPressed: () {
+                      context.push('/survey-management/edit/${survey.id}');
+                    },
+                    tooltip: 'Edit',
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      size: 20,
+                      color: Colors.red,
+                    ),
+                    onPressed: () => _showDeleteDialog(survey),
+                    tooltip: 'Delete',
+                  ),
+                ],
+              ),
+              width: 100,
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-    
-    if (difference.inDays == 0) {
-      return 'Today';
-    } else if (difference.inDays == 1) {
-      return 'Yesterday';
-    } else if (difference.inDays < 30) {
-      return '${difference.inDays} days ago';
-    } else {
-      final months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-      ];
-      return '${months[date.month - 1]} ${date.day}, ${date.year}';
-    }
+  Widget _buildDataCell(Widget child, {required double width}) {
+    return Container(
+      width: width,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: child,
+    );
   }
 
-  void _showSurveyOptions(SurveyModel survey) {
-    showModalBottomSheet(
+  void _showDeleteDialog(SurveyModel survey) {
+    showDialog(
       context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text('Edit Survey'),
-              onTap: () {
-                Navigator.pop(context);
-                // TODO: Navigate to edit survey
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Edit survey - Coming Soon')),
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Survey'),
+          content: Text(
+            'Are you sure you want to delete "${survey.title}"? This action cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                final messenger = ScaffoldMessenger.of(context);
+                final provider = Provider.of<SurveyProvider>(
+                  context,
+                  listen: false,
                 );
+                final success = await provider.deleteSurvey(survey.id);
+
+                if (mounted) {
+                  messenger.showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        success
+                            ? 'Survey deleted successfully'
+                            : 'Failed to delete survey',
+                      ),
+                      backgroundColor: success ? Colors.green : Colors.red,
+                    ),
+                  );
+                }
               },
-            ),
-            ListTile(
-              leading: const Icon(Icons.copy),
-              title: const Text('Duplicate Survey'),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Duplicate survey - Coming Soon')),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete, color: AppColors.error),
-              title: const Text('Delete Survey', 
-                style: TextStyle(color: AppColors.error),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
               ),
-              onTap: () {
-                Navigator.pop(context);
-                // Show delete confirmation
-              },
+              child: const Text('Delete'),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// Add Periode Dialog
-class _AddPeriodeDialog extends StatefulWidget {
-  @override
-  State<_AddPeriodeDialog> createState() => _AddPeriodeDialogState();
-}
-
-class _AddPeriodeDialogState extends State<_AddPeriodeDialog> {
-  final _formKey = GlobalKey<FormState>();
-  final _yearController = TextEditingController();
-
-  @override
-  void dispose() {
-    _yearController.dispose();
-    super.dispose();
-  }
-
-  void _savePeriode() {
-    if (_formKey.currentState!.validate()) {
-      final year = int.parse(_yearController.text);
-      final periode = PeriodeModel(
-        id: 'p$year',
-        name: 'Periode $year',
-        year: year,
-        createdAt: DateTime.now(),
-      );
-
-      context.read<SurveyProvider>().addPeriode(periode);
-      Navigator.of(context).pop();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Periode $year berhasil ditambahkan'),
-          backgroundColor: AppColors.success,
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Tambah Periode Baru'),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _yearController,
-              decoration: const InputDecoration(
-                labelText: 'Tahun',
-                hintText: 'Contoh: 2023',
-                prefixIcon: Icon(Icons.calendar_today),
-              ),
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Tahun tidak boleh kosong';
-                }
-                final year = int.tryParse(value);
-                if (year == null) {
-                  return 'Masukkan tahun yang valid';
-                }
-                if (year < 2000 || year > 2100) {
-                  return 'Tahun harus antara 2000-2100';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Format: Periode [Tahun]',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.textHint,
-              ),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Batal'),
-        ),
-        ElevatedButton(
-          onPressed: _savePeriode,
-          child: const Text('Tambah'),
-        ),
-      ],
-    );
-  }
-}
-
-// Edit Periode Dialog
-class _EditPeriodeDialog extends StatefulWidget {
-  final PeriodeModel periode;
-
-  const _EditPeriodeDialog({required this.periode});
-
-  @override
-  State<_EditPeriodeDialog> createState() => _EditPeriodeDialogState();
-}
-
-class _EditPeriodeDialogState extends State<_EditPeriodeDialog> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _nameController;
-
-  @override
-  void initState() {
-    super.initState();
-    _nameController = TextEditingController(text: widget.periode.name);
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    super.dispose();
-  }
-
-  void _savePeriode() {
-    if (_formKey.currentState!.validate()) {
-      final updatedPeriode = widget.periode.copyWith(
-        name: _nameController.text.trim(),
-      );
-
-      context.read<SurveyProvider>().updatePeriode(
-        widget.periode.id,
-        updatedPeriode,
-      );
-      
-      Navigator.of(context).pop();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Periode berhasil diupdate'),
-          backgroundColor: AppColors.success,
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Edit Nama Periode'),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Nama Periode',
-                hintText: 'Contoh: Periode 2023',
-                prefixIcon: Icon(Icons.label),
-              ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Nama periode tidak boleh kosong';
-                }
-                if (value.trim().length < 3) {
-                  return 'Nama periode minimal 3 karakter';
-                }
-                return null;
-              },
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Batal'),
-        ),
-        ElevatedButton(
-          onPressed: _savePeriode,
-          child: const Text('Simpan'),
-        ),
-      ],
+        );
+      },
     );
   }
 }

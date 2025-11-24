@@ -31,7 +31,7 @@ class _AlumniEmploymentScreenState extends State<AlumniEmploymentScreen> {
       _isLoading = true;
     });
     
-    // TODO: Save response to API
+    // TODO: Save response to API (dartdoc)
     await Future.delayed(const Duration(seconds: 1));
     
     setState(() {
@@ -255,8 +255,11 @@ class _AlumniEmploymentScreenState extends State<AlumniEmploymentScreen> {
           children: [
             Radio<String>(
               value: value,
+              // ignore: deprecated_member_use
               groupValue: _isEmployed,
-              onChanged: (val) {
+              toggleable: true,
+              // ignore: deprecated_member_use
+              onChanged: (String? val) {
                 setState(() {
                   _isEmployed = val;
                 });
