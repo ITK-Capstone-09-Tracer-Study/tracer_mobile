@@ -796,13 +796,24 @@ class _SurveyFormScreenState extends State<SurveyFormScreen> {
             ),
           )
         else
-          ListView.builder(
+          ReorderableListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
+            buildDefaultDragHandles: false,
             itemCount: section.questions.length,
+            onReorder: (oldIndex, newIndex) {
+              setState(() {
+                if (newIndex > oldIndex) newIndex--;
+                final item = section.questions.removeAt(oldIndex);
+                section.questions.insert(newIndex, item);
+              });
+            },
             itemBuilder: (context, qIndex) {
               final question = section.questions[qIndex];
-              return _buildQuestionCard(question, sectionIndex, qIndex);
+              return Container(
+                key: ObjectKey(question),
+                child: _buildQuestionCard(question, sectionIndex, qIndex),
+              );
             },
           ),
       ],
@@ -824,6 +835,11 @@ class _SurveyFormScreenState extends State<SurveyFormScreen> {
           // Question Header
           Row(
             children: [
+              ReorderableDragStartListener(
+                index: qIndex,
+                child: const Icon(Icons.drag_handle, color: AppColors.textSecondary),
+              ),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   'Question ${qIndex + 1}',
@@ -905,18 +921,50 @@ class _SurveyFormScreenState extends State<SurveyFormScreen> {
           ),
           const SizedBox(height: 12),
 
-          // Required Checkbox
-          Row(
+          // Required and Has Condition Checkboxes
+          Wrap(
+            spacing: 16,
+            runSpacing: 8,
             children: [
-              Checkbox(
-                value: question.required,
-                onChanged: (value) {
-                  setState(() {
-                    question.required = value ?? false;
-                  });
-                },
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Checkbox(
+                    value: question.required,
+                    onChanged: (value) {
+                      setState(() {
+                        question.required = value ?? false;
+                      });
+                    },
+                  ),
+                  const Text('Required'),
+                ],
               ),
-              const Text('Required'),
+              // Show Has Condition only for Multiple Choice and Checkboxes
+              if (question.type == QuestionType.multipleChoice || 
+                  question.type == QuestionType.checkboxes)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Checkbox(
+                      value: question.hasCondition,
+                      onChanged: (value) {
+                        setState(() {
+                          question.hasCondition = value ?? false;
+                          // If enabling hasCondition and options don't have values yet, initialize them
+                          if (question.hasCondition) {
+                            for (var opt in question.options) {
+                              if (opt.value.isEmpty) {
+                                opt.value = opt.label;
+                              }
+                            }
+                          }
+                        });
+                      },
+                    ),
+                    const Text('Has Condition'),
+                  ],
+                ),
             ],
           ),
 
@@ -940,6 +988,80 @@ class _SurveyFormScreenState extends State<SurveyFormScreen> {
   }
 
   Widget _buildOptionsField(QuestionModel question, int sectionIndex, int qIndex) {
+    // If hasCondition is false, show simple list
+    if (!question.hasCondition) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Options',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              TextButton.icon(
+                onPressed: () => _addOption(sectionIndex, qIndex),
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('Add Option'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          
+          // Simple Options List
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: question.options.length,
+            itemBuilder: (context, optIndex) {
+              final option = question.options[optIndex];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        initialValue: option.label,
+                        decoration: InputDecoration(
+                          labelText: 'Option ${optIndex + 1}',
+                          hintText: 'Enter option text',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
+                        onChanged: (value) {
+                          option.label = value;
+                          option.value = value;
+                        },
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                      onPressed: () => _deleteOption(sectionIndex, qIndex, optIndex),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      );
+    }
+    
+    // If hasCondition is true, show advanced horizontal scrollable layout
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -958,56 +1080,213 @@ class _SurveyFormScreenState extends State<SurveyFormScreen> {
             TextButton.icon(
               onPressed: () => _addOption(sectionIndex, qIndex),
               icon: const Icon(Icons.add, size: 16),
-              label: const Text('Add Option'),
+              label: const Text('Add to options'),
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.primary,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         
-        // Options List
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: question.options.length,
-          itemBuilder: (context, optIndex) {
-            final option = question.options[optIndex];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
+        // Wrapper with synchronized scrolling
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey[300]!),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              width: 750,
+              child: Column(
                 children: [
-                  Expanded(
-                    child: TextFormField(
-                      initialValue: option.label,
-                      decoration: InputDecoration(
-                        labelText: 'Option ${optIndex + 1}',
-                        hintText: 'Enter option text',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                  // Header Row
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                    ),
+                    child: Row(
+                      children: const [
+                        SizedBox(width: 28), // For drag handle (20) + gap (8)
+                        SizedBox(
+                          width: 200,
+                          child: Text('Label', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
+                        SizedBox(width: 12),
+                        SizedBox(
+                          width: 150,
+                          child: Text('Value', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
                         ),
-                      ),
-                      onChanged: (value) {
-                        option.label = value;
-                        option.value = value; // Use label as value
+                        SizedBox(width: 12),
+                        SizedBox(
+                          width: 200,
+                          child: Text('Condition', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  // Scrollable Options with Reordering
+                  SizedBox(
+                    height: 300,
+                    child: ReorderableListView.builder(
+                      shrinkWrap: true,
+                      itemCount: question.options.length,
+                      onReorder: (oldIndex, newIndex) {
+                        setState(() {
+                          if (newIndex > oldIndex) newIndex--;
+                          final item = question.options.removeAt(oldIndex);
+                          question.options.insert(newIndex, item);
+                        });
+                      },
+                      itemBuilder: (context, optIndex) {
+                        final option = question.options[optIndex];
+                        return _buildOptionRow(
+                          key: ValueKey('opt_${sectionIndex}_${qIndex}_$optIndex'),
+                          option: option,
+                          optIndex: optIndex,
+                          sectionIndex: sectionIndex,
+                          qIndex: qIndex,
+                        );
                       },
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                    onPressed: () => _deleteOption(sectionIndex, qIndex, optIndex),
-                  ),
                 ],
               ),
-            );
-          },
+            ),
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildOptionRow({
+    required Key key,
+    required QuestionOption option,
+    required int optIndex,
+    required int sectionIndex,
+    required int qIndex,
+  }) {
+    final sections = _sections;
+    
+    return Container(
+      key: key,
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          // Drag Handle
+          const Icon(Icons.drag_indicator, color: AppColors.textSecondary, size: 20),
+          const SizedBox(width: 8),
+            
+            // Label Field
+            SizedBox(
+              width: 200,
+              child: TextFormField(
+                initialValue: option.label,
+                decoration: InputDecoration(
+                  hintText: 'nihil',
+                  isDense: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                ),
+                onChanged: (value) {
+                  option.label = value;
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            
+            // Value Field
+            SizedBox(
+              width: 150,
+              child: TextFormField(
+                initialValue: option.value,
+                decoration: InputDecoration(
+                  hintText: '321714',
+                  isDense: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                ),
+                onChanged: (value) {
+                  option.value = value;
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            
+            // Condition Dropdown
+            SizedBox(
+              width: 200,
+              child: DropdownButtonFormField<String>(
+                initialValue: option.condition,
+                decoration: InputDecoration(
+                  hintText: 'Submit form',
+                  isDense: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                ),
+                items: [
+                  const DropdownMenuItem(
+                    value: 'submit_form',
+                    child: Text('Submit form'),
+                  ),
+                  // Add sections as options
+                  ...sections.where((s) => s.id != sections[sectionIndex].id).map((section) {
+                    return DropdownMenuItem(
+                      value: 'next_section_${section.id}',
+                      child: Text('Next section: ${section.title}'),
+                    );
+                  }),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    option.condition = value;
+                    // Extract target section ID if it's a next_section condition
+                    if (value != null && value.startsWith('next_section_')) {
+                      final sectionId = value.replaceFirst('next_section_', '');
+                      option.targetSectionId = int.tryParse(sectionId);
+                    } else {
+                      option.targetSectionId = null;
+                    }
+                  });
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            
+            // Delete Button
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+              onPressed: () => _deleteOption(sectionIndex, qIndex, optIndex),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+          ],
+        ),
     );
   }
 

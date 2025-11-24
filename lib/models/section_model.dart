@@ -90,7 +90,7 @@ class QuestionModel {
   QuestionType type; // short_answer, paragraph, multiple_choice, checkboxes, linear_scale
   String question;
   bool required;
-  final bool hasCondition;
+  bool hasCondition; // Changed from final to mutable
   final String? condition;
   List<QuestionOption> options; // For multiple_choice & checkboxes
   String? fromLabel; // For linear_scale
@@ -186,12 +186,14 @@ class QuestionModel {
 class QuestionOption {
   String label;
   String value;
-  final String? condition;
+  String? condition; // 'next_section' or 'submit_form'
+  int? targetSectionId; // ID of section to jump to (if condition is next_section)
 
   QuestionOption({
     required this.label,
     required this.value,
     this.condition,
+    this.targetSectionId,
   });
 
   factory QuestionOption.fromJson(Map<String, dynamic> json) {
@@ -199,6 +201,7 @@ class QuestionOption {
       label: json['label'] as String,
       value: json['value'] as String,
       condition: json['condition'] as String?,
+      targetSectionId: json['target_section_id'] as int?,
     );
   }
 
@@ -210,6 +213,9 @@ class QuestionOption {
     if (condition != null && condition!.isNotEmpty) {
       map['condition'] = condition;
     }
+    if (targetSectionId != null) {
+      map['target_section_id'] = targetSectionId;
+    }
     return map;
   }
 
@@ -217,11 +223,13 @@ class QuestionOption {
     String? label,
     String? value,
     String? condition,
+    int? targetSectionId,
   }) {
     return QuestionOption(
       label: label ?? this.label,
       value: value ?? this.value,
       condition: condition ?? this.condition,
+      targetSectionId: targetSectionId ?? this.targetSectionId,
     );
   }
 }
