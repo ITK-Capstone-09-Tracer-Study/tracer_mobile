@@ -10,6 +10,8 @@ import '../screens/survey_management/survey_management_screen.dart';
 import '../screens/survey_management/survey_form_screen.dart';
 import '../screens/survey_kinds/survey_kinds_screen.dart';
 import '../screens/survey_kinds/survey_kind_form_screen.dart';
+import '../screens/survey_report/survey_report_screen.dart';
+import '../screens/survey_report/survey_statistics_screen.dart';
 import '../screens/public/public_home_screen.dart';
 import '../screens/public/faq_screen.dart';
 import '../screens/public/alumni_verification_screen.dart';
@@ -165,6 +167,22 @@ class AppRouter {
             },
           ),
         ],
+      ),
+      
+      // Survey Report routes
+      GoRoute(
+        path: '/survey-report',
+        name: 'survey-report',
+        builder: (context, state) => const SurveyReportScreen(),
+      ),
+      
+      GoRoute(
+        path: '/survey-statistics/:surveyId',
+        name: 'survey-statistics',
+        builder: (context, state) {
+          final surveyId = int.parse(state.pathParameters['surveyId']!);
+          return SurveyStatisticsScreen(surveyId: surveyId);
+        },
       ),
     ],
     

@@ -88,7 +88,7 @@ class RolePermissions {
   /// Head of Unit permissions
   /// - Dapat melihat laporan pengisian kuisioner
   static const List<String> headOfUnitMenus = [
-    'unit_reports', // Laporan Unit
+    'survey_report', // Survey Report
   ];
 
   /// Pimpinan Unit (Head of Unit) permissions

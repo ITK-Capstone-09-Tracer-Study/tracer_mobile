@@ -212,8 +212,9 @@ class _AppDrawerState extends State<AppDrawer> {
       );
     }
     
-    // Tracer Team menus
-    if (RolePermissions.hasMenuAccess(userRole, 'survey_management')) {
+    // Manage Survey menu (for tracer_team and head_of_unit)
+    if (RolePermissions.hasMenuAccess(userRole, 'survey_management') ||
+        RolePermissions.hasMenuAccess(userRole, 'survey_report')) {
       menus.add(
         Theme(
           data: Theme.of(context).copyWith(
@@ -221,20 +222,32 @@ class _AppDrawerState extends State<AppDrawer> {
           ),
           child: ExpansionTile(
             leading: const Icon(Icons.assignment_outlined),
-            title: const Text('Survey'),
+            title: const Text('Manage Survey'),
             children: [
-              _buildSubMenuItem(
-                context,
-                icon: Icons.category_outlined,
-                title: 'Survey Kinds',
-                route: '/survey-kinds',
-              ),
-              _buildSubMenuItem(
-                context,
-                icon: Icons.description_outlined,
-                title: 'Survey Management',
-                route: '/survey-management',
-              ),
+              // Survey Report - untuk head_of_unit
+              if (RolePermissions.hasMenuAccess(userRole, 'survey_report'))
+                _buildSubMenuItem(
+                  context,
+                  icon: Icons.poll_outlined,
+                  title: 'Survey Report',
+                  route: '/survey-report',
+                ),
+              // Survey Kinds - untuk tracer_team
+              if (RolePermissions.hasMenuAccess(userRole, 'survey_management'))
+                _buildSubMenuItem(
+                  context,
+                  icon: Icons.category_outlined,
+                  title: 'Survey Kinds',
+                  route: '/survey-kinds',
+                ),
+              // Survey Management - untuk tracer_team
+              if (RolePermissions.hasMenuAccess(userRole, 'survey_management'))
+                _buildSubMenuItem(
+                  context,
+                  icon: Icons.description_outlined,
+                  title: 'Survey Management',
+                  route: '/survey-management',
+                ),
             ],
           ),
         ),
@@ -345,7 +358,14 @@ class _AppDrawerState extends State<AppDrawer> {
     required String title,
     required String route,
   }) {
-    final currentRoute = GoRouterState.of(context).uri.toString();
+    // Safely get current route
+    String currentRoute = '/';
+    try {
+      currentRoute = GoRouterState.of(context).uri.toString();
+    } catch (e) {
+      // If we can't get the route, just use default
+      debugPrint('Could not get current route: $e');
+    }
     final isSelected = currentRoute.startsWith(route);
     
     return ListTile(
@@ -371,8 +391,14 @@ class _AppDrawerState extends State<AppDrawer> {
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
       ),
       onTap: () {
-        context.go(route);
-        Navigator.pop(context); // Close drawer after navigation
+        // Close drawer first
+        Navigator.pop(context);
+        // Then navigate using a slight delay to ensure drawer is closed
+        Future.microtask(() {
+          if (context.mounted) {
+            context.go(route);
+          }
+        });
       },
     );
   }
