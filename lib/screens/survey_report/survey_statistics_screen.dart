@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import '../../constants/colors.dart';
 import '../../constants/app_constants.dart';
 import '../../widgets/custom_app_bar.dart';
@@ -236,7 +237,7 @@ class _SurveyStatisticsScreenState extends State<SurveyStatisticsScreen> {
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<int>(
-                        value: provider.selectedFacultyId,
+                        initialValue: provider.selectedFacultyId,
                         decoration: const InputDecoration(
                           hintText: 'Select an option',
                           border: OutlineInputBorder(),
@@ -274,7 +275,7 @@ class _SurveyStatisticsScreenState extends State<SurveyStatisticsScreen> {
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<int>(
-                        value: provider.selectedMajorId,
+                        initialValue: provider.selectedMajorId,
                         decoration: const InputDecoration(
                           hintText: 'Select an option',
                           border: OutlineInputBorder(),
@@ -459,10 +460,23 @@ class _SurveyStatisticsScreenState extends State<SurveyStatisticsScreen> {
   Widget _buildTableRow(AlumniResponseModel response) {
     final dateFormat = DateFormat('MMM d, yyyy HH:mm:ss');
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Row(
-        children: [
+    return InkWell(
+      onTap: response.hasCompleted
+          ? () {
+              // Navigate to response detail using GoRouter
+              context.push(
+                '/survey-response-detail',
+                extra: {
+                  'surveyId': widget.surveyId,
+                  'respondentId': response.id,
+                },
+              );
+            }
+          : null,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        child: Row(
+          children: [
           Expanded(
             flex: 3,
             child: Text(
@@ -528,6 +542,7 @@ class _SurveyStatisticsScreenState extends State<SurveyStatisticsScreen> {
                   ),
           ),
         ],
+        ),
       ),
     );
   }
