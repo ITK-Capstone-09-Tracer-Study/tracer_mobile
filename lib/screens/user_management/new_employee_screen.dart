@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/user_provider.dart';
-import '../../providers/unit_provider.dart';
+import '../../providers/major_provider.dart';
+import '../../providers/faculty_provider.dart';
 import '../../models/user_model.dart';
+import '../../models/major_model.dart';
+import '../../models/faculty_model.dart';
 import '../../constants/colors.dart';
 import '../../constants/app_constants.dart';
 import '../../widgets/custom_app_bar.dart';
@@ -29,8 +32,8 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
   // Module Permissions
   String? _selectedRole;
   String? _selectedUnitType;
-  String? _selectedFaculty;
-  String? _selectedMajor;
+  FacultyModel? _selectedFaculty;
+  MajorModel? _selectedMajor;
   final TextEditingController _roleSearchController = TextEditingController();
   final TextEditingController _unitTypeSearchController = TextEditingController();
   final TextEditingController _facultySearchController = TextEditingController();
@@ -51,8 +54,8 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
   
   List<Map<String, String>> _filteredRoles = [];
   List<Map<String, String>> _filteredUnitTypes = [];
-  List<String> _filteredFaculties = [];
-  List<String> _filteredMajors = [];
+  List<FacultyModel> _filteredFaculties = [];
+  List<MajorModel> _filteredMajors = [];
   
   bool _isRoleDropdownOpen = false;
   bool _isUnitTypeDropdownOpen = false;
@@ -64,6 +67,12 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
     super.initState();
     _filteredRoles = _roles;
     _filteredUnitTypes = _unitTypes;
+    
+    // Initialize providers
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<MajorProvider>().initialize();
+      context.read<FacultyProvider>().initialize();
+    });
   }
 
   @override
@@ -105,35 +114,25 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
   }
 
   void _filterFaculties(String query) {
-    final unitProvider = context.read<UnitProvider>();
-    final faculties = unitProvider.getFakultasList()
-        .map((unit) => unit.name)
-        .toList();
+    final facultyProvider = context.read<FacultyProvider>();
     
     setState(() {
       if (query.isEmpty) {
-        _filteredFaculties = faculties;
+        _filteredFaculties = facultyProvider.faculties;
       } else {
-        _filteredFaculties = faculties
-            .where((name) => name.toLowerCase().contains(query.toLowerCase()))
-            .toList();
+        _filteredFaculties = facultyProvider.searchFaculties(query);
       }
     });
   }
 
   void _filterMajors(String query) {
-    final unitProvider = context.read<UnitProvider>();
-    final majors = unitProvider.getUnitsByType('program_studi')
-        .map((unit) => unit.name)
-        .toList();
+    final majorProvider = context.read<MajorProvider>();
     
     setState(() {
       if (query.isEmpty) {
-        _filteredMajors = majors;
+        _filteredMajors = majorProvider.majors;
       } else {
-        _filteredMajors = majors
-            .where((name) => name.toLowerCase().contains(query.toLowerCase()))
-            .toList();
+        _filteredMajors = majorProvider.searchMajors(query);
       }
     });
   }
@@ -178,12 +177,9 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
             );
             return;
           }
-          unitName = _selectedFaculty;
-          // Get faculty ID from UnitProvider
-          final unitProvider = context.read<UnitProvider>();
-          final faculty = unitProvider.getFakultasList()
-              .firstWhere((unit) => unit.name == _selectedFaculty);
-          unitId = int.tryParse(faculty.id);
+          unitName = _selectedFaculty?.name;
+          // Get faculty ID from selected FacultyModel
+          unitId = _selectedFaculty?.id;
         } else if (_selectedUnitType == 'major') {
           if (_selectedMajor == null) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -194,12 +190,9 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
             );
             return;
           }
-          unitName = _selectedMajor;
-          // Get major ID from UnitProvider
-          final unitProvider = context.read<UnitProvider>();
-          final major = unitProvider.getUnitsByType('program_studi')
-              .firstWhere((unit) => unit.name == _selectedMajor);
-          unitId = int.tryParse(major.id);
+          unitName = _selectedMajor?.name;
+          // Get major ID from selected MajorModel
+          unitId = _selectedMajor?.id;
         } else {
           // Institutional
           unitType = 'institutional';
@@ -216,12 +209,9 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
           return;
         }
         unitType = 'major';
-        unitName = _selectedMajor;
-        // Get major ID from UnitProvider
-        final unitProvider = context.read<UnitProvider>();
-        final major = unitProvider.getUnitsByType('program_studi')
-            .firstWhere((unit) => unit.name == _selectedMajor);
-        unitId = int.tryParse(major.id);
+        unitName = _selectedMajor?.name;
+        // Get major ID from selected MajorModel
+        unitId = _selectedMajor?.id;
       } else {
         // Admin and TracerTeam
         unitType = 'institutional';
@@ -519,7 +509,7 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
         if (_selectedRole == 'major_team') ...[
           _buildLabel('Major', required: true),
           const SizedBox(height: 8),
-          _buildSearchableDropdown(
+          _buildMajorDropdown(
             hint: 'Select a major',
             value: _selectedMajor,
             items: _filteredMajors,
@@ -533,11 +523,9 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
                   _isUnitTypeDropdownOpen = false;
                   _isFacultyDropdownOpen = false;
                   _majorSearchController.clear();
-                  // Load majors from UnitProvider
-                  final unitProvider = context.read<UnitProvider>();
-                  _filteredMajors = unitProvider.getUnitsByType('program_studi')
-                      .map((unit) => unit.name)
-                      .toList();
+                  // Load majors from MajorProvider
+                  final majorProvider = context.read<MajorProvider>();
+                  _filteredMajors = majorProvider.majors;
                 }
               });
             },
@@ -591,7 +579,7 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
           if (_selectedUnitType == 'faculty') ...[
             _buildLabel('Faculty', required: true),
             const SizedBox(height: 8),
-            _buildSearchableDropdown(
+            _buildFacultyDropdown(
               hint: 'Select a faculty',
               value: _selectedFaculty,
               items: _filteredFaculties,
@@ -605,11 +593,9 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
                     _isUnitTypeDropdownOpen = false;
                     _isMajorDropdownOpen = false;
                     _facultySearchController.clear();
-                    // Load faculties from UnitProvider
-                    final unitProvider = context.read<UnitProvider>();
-                    _filteredFaculties = unitProvider.getFakultasList()
-                        .map((unit) => unit.name)
-                        .toList();
+                    // Load faculties from FacultyProvider
+                    final facultyProvider = context.read<FacultyProvider>();
+                    _filteredFaculties = facultyProvider.faculties;
                   }
                 });
               },
@@ -627,7 +613,7 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
           if (_selectedUnitType == 'major') ...[
             _buildLabel('Major', required: true),
             const SizedBox(height: 8),
-            _buildSearchableDropdown(
+            _buildMajorDropdown(
               hint: 'Select a major',
               value: _selectedMajor,
               items: _filteredMajors,
@@ -641,11 +627,9 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
                     _isUnitTypeDropdownOpen = false;
                     _isFacultyDropdownOpen = false;
                     _majorSearchController.clear();
-                    // Load majors from UnitProvider
-                    final unitProvider = context.read<UnitProvider>();
-                    _filteredMajors = unitProvider.getUnitsByType('program_studi')
-                        .map((unit) => unit.name)
-                        .toList();
+                    // Load majors from MajorProvider
+                    final majorProvider = context.read<MajorProvider>();
+                    _filteredMajors = majorProvider.majors;
                   }
                 });
               },
@@ -685,15 +669,16 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
     );
   }
 
-  Widget _buildSearchableDropdown({
+  // Major dropdown with MajorModel support
+  Widget _buildMajorDropdown({
     required String hint,
-    required String? value,
-    required List<String> items,
+    required MajorModel? value,
+    required List<MajorModel> items,
     required TextEditingController searchController,
     required bool isOpen,
     required VoidCallback onToggle,
     required Function(String) onSearch,
-    required Function(String) onSelect,
+    required Function(MajorModel) onSelect,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -718,7 +703,7 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    value ?? hint,
+                    value?.name ?? hint,
                     style: TextStyle(
                       color: value == null 
                           ? AppColors.textHint 
@@ -790,7 +775,131 @@ class _NewEmployeeScreenState extends State<NewEmployeeScreen> {
                             vertical: 12,
                           ),
                           child: Text(
-                            item,
+                            item.name,
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  // Faculty dropdown with FacultyModel support
+  Widget _buildFacultyDropdown({
+    required String hint,
+    required FacultyModel? value,
+    required List<FacultyModel> items,
+    required TextEditingController searchController,
+    required bool isOpen,
+    required VoidCallback onToggle,
+    required Function(String) onSearch,
+    required Function(FacultyModel) onSelect,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Dropdown Button
+        InkWell(
+          onTap: onToggle,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              border: Border.all(
+                color: isOpen ? AppColors.primary : AppColors.border,
+                width: isOpen ? 2 : 1,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    value?.name ?? hint,
+                    style: TextStyle(
+                      color: value == null 
+                          ? AppColors.textHint 
+                          : AppColors.textPrimary,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                Icon(
+                  isOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                  color: AppColors.textSecondary,
+                ),
+              ],
+            ),
+          ),
+        ),
+        
+        // Dropdown Menu
+        if (isOpen)
+          Container(
+            margin: const EdgeInsets.only(top: 4),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              border: Border.all(color: AppColors.border),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.shadow,
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Search Field
+                TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search...',
+                    prefixIcon: const Icon(Icons.search, size: 20),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onChanged: onSearch,
+                ),
+                
+                const SizedBox(height: 8),
+                
+                // Items List
+                Container(
+                  constraints: const BoxConstraints(maxHeight: 200),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      return InkWell(
+                        onTap: () => onSelect(item),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 12,
+                          ),
+                          child: Text(
+                            item.name,
                             style: const TextStyle(
                               color: AppColors.textPrimary,
                               fontSize: 14,

@@ -1,19 +1,19 @@
 import 'package:dio/dio.dart';
-import '../models/faculty_model.dart';
+import '../models/major_model.dart';
 import 'api_client.dart';
 import 'api_response.dart';
 
-/// Service untuk handle Faculty API
-/// Endpoint: /{panel}/faculties
-class FacultyService {
+/// Service untuk handle Major API
+/// Endpoint: /{panel}/majors
+class MajorService {
   final ApiClient _apiClient = ApiClient();
   
   /// Panel untuk admin operations
   static const String panel = 'admin';
 
-  /// Get paginated list of faculties
-  /// GET /{panel}/faculties?page=1&per_page=10
-  Future<ApiResponse<PaginatedResponse<FacultyModel>>> getFaculties({
+  /// Get paginated list of majors
+  /// GET /{panel}/majors?page=1&per_page=10
+  Future<ApiResponse<PaginatedResponse<MajorModel>>> getMajors({
     int page = 1,
     int perPage = 10,
     Map<String, dynamic>? filters,
@@ -36,14 +36,14 @@ class FacultyService {
       if (include != null) queryParams['include'] = include;
 
       final response = await _apiClient.dio.get(
-        '/$panel/faculties',
+        '/$panel/majors',
         queryParameters: queryParams,
       );
 
       if (response.statusCode == 200) {
-        final paginatedData = PaginatedResponse<FacultyModel>.fromJson(
+        final paginatedData = PaginatedResponse<MajorModel>.fromJson(
           response.data as Map<String, dynamic>,
-          (json) => FacultyModel.fromJson(json),
+          (json) => MajorModel.fromJson(json),
         );
         
         return ApiResponse.success(
@@ -53,12 +53,12 @@ class FacultyService {
       }
 
       return ApiResponse.error(
-        message: 'Failed to fetch faculties',
+        message: 'Failed to fetch majors',
         statusCode: response.statusCode,
       );
     } on DioException catch (e) {
       return ApiResponse.error(
-        message: e.response?.data['message'] ?? 'Failed to fetch faculties',
+        message: e.response?.data['message'] ?? 'Failed to fetch majors',
         statusCode: e.response?.statusCode,
       );
     } catch (e) {
@@ -68,38 +68,42 @@ class FacultyService {
     }
   }
 
-  /// Get all faculties without pagination (for dropdowns)
-  /// GET /{panel}/faculties?per_page=1000
-  Future<ApiResponse<List<FacultyModel>>> getAllFaculties() async {
+  /// Get all majors without pagination (for dropdowns)
+  /// GET /{panel}/majors?per_page=-1 or high number
+  Future<ApiResponse<List<MajorModel>>> getAllMajors({
+    String? include,
+  }) async {
     try {
       final queryParams = <String, dynamic>{
-        'per_page': 1000, // Get all faculties
+        'per_page': 1000, // Get all majors
       };
+      
+      if (include != null) queryParams['include'] = include;
 
       final response = await _apiClient.dio.get(
-        '/$panel/faculties',
+        '/$panel/majors',
         queryParameters: queryParams,
       );
 
       if (response.statusCode == 200) {
         final dataList = response.data['data'] as List<dynamic>;
-        final faculties = dataList
-            .map((json) => FacultyModel.fromJson(json as Map<String, dynamic>))
+        final majors = dataList
+            .map((json) => MajorModel.fromJson(json as Map<String, dynamic>))
             .toList();
         
         return ApiResponse.success(
-          data: faculties,
+          data: majors,
           statusCode: response.statusCode,
         );
       }
 
       return ApiResponse.error(
-        message: 'Failed to fetch faculties',
+        message: 'Failed to fetch majors',
         statusCode: response.statusCode,
       );
     } on DioException catch (e) {
       return ApiResponse.error(
-        message: e.response?.data['message'] ?? 'Failed to fetch faculties',
+        message: e.response?.data['message'] ?? 'Failed to fetch majors',
         statusCode: e.response?.statusCode,
       );
     } catch (e) {
@@ -109,36 +113,36 @@ class FacultyService {
     }
   }
 
-  /// Get single faculty by ID
-  /// GET /{panel}/faculties/{id}
-  Future<ApiResponse<FacultyModel>> getFaculty(int id) async {
+  /// Get single major by ID
+  /// GET /{panel}/majors/{id}
+  Future<ApiResponse<MajorModel>> getMajor(int id) async {
     try {
-      final response = await _apiClient.dio.get('/$panel/faculties/$id');
+      final response = await _apiClient.dio.get('/$panel/majors/$id');
 
       if (response.statusCode == 200) {
-        final facultyData = response.data['data'] as Map<String, dynamic>;
-        final faculty = FacultyModel.fromJson(facultyData);
+        final majorData = response.data['data'] as Map<String, dynamic>;
+        final major = MajorModel.fromJson(majorData);
         
         return ApiResponse.success(
-          data: faculty,
+          data: major,
           statusCode: response.statusCode,
         );
       }
 
       return ApiResponse.error(
-        message: 'Failed to fetch faculty',
+        message: 'Failed to fetch major',
         statusCode: response.statusCode,
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
         return ApiResponse.error(
-          message: 'Faculty not found',
+          message: 'Major not found',
           statusCode: 404,
         );
       }
       
       return ApiResponse.error(
-        message: e.response?.data['message'] ?? 'Failed to fetch faculty',
+        message: e.response?.data['message'] ?? 'Failed to fetch major',
         statusCode: e.response?.statusCode,
       );
     } catch (e) {
@@ -148,28 +152,28 @@ class FacultyService {
     }
   }
 
-  /// Create new faculty
-  /// POST /{panel}/faculties
-  Future<ApiResponse<FacultyModel>> createFaculty(FacultyModel faculty) async {
+  /// Create new major
+  /// POST /{panel}/majors
+  Future<ApiResponse<MajorModel>> createMajor(MajorModel major) async {
     try {
       final response = await _apiClient.dio.post(
-        '/$panel/faculties',
-        data: faculty.toRequestJson(),
+        '/$panel/majors',
+        data: major.toRequestJson(),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final facultyData = response.data['data'] as Map<String, dynamic>;
-        final createdFaculty = FacultyModel.fromJson(facultyData);
+        final majorData = response.data['data'] as Map<String, dynamic>;
+        final createdMajor = MajorModel.fromJson(majorData);
         
         return ApiResponse.success(
-          data: createdFaculty,
-          message: 'Faculty created successfully',
+          data: createdMajor,
+          message: 'Major created successfully',
           statusCode: response.statusCode,
         );
       }
 
       return ApiResponse.error(
-        message: 'Failed to create faculty',
+        message: 'Failed to create major',
         statusCode: response.statusCode,
       );
     } on DioException catch (e) {
@@ -182,7 +186,7 @@ class FacultyService {
       }
       
       return ApiResponse.error(
-        message: e.response?.data['message'] ?? 'Failed to create faculty',
+        message: e.response?.data['message'] ?? 'Failed to create major',
         statusCode: e.response?.statusCode,
       );
     } catch (e) {
@@ -192,41 +196,37 @@ class FacultyService {
     }
   }
 
-  /// Update existing faculty
-  /// PUT /{panel}/faculties/{id}
-  Future<ApiResponse<FacultyModel>> updateFaculty({
-    required int id,
-    required FacultyModel faculty,
-  }) async {
+  /// Update major
+  /// PUT /{panel}/majors/{id}
+  Future<ApiResponse<MajorModel>> updateMajor(int id, MajorModel major) async {
     try {
       final response = await _apiClient.dio.put(
-        '/$panel/faculties/$id',
-        data: faculty.toRequestJson(),
+        '/$panel/majors/$id',
+        data: major.toRequestJson(),
       );
 
       if (response.statusCode == 200) {
-        final facultyData = response.data['data'] as Map<String, dynamic>;
-        final updatedFaculty = FacultyModel.fromJson(facultyData);
+        final majorData = response.data['data'] as Map<String, dynamic>;
+        final updatedMajor = MajorModel.fromJson(majorData);
         
         return ApiResponse.success(
-          data: updatedFaculty,
-          message: 'Faculty updated successfully',
+          data: updatedMajor,
+          message: 'Major updated successfully',
           statusCode: response.statusCode,
         );
       }
 
       return ApiResponse.error(
-        message: 'Failed to update faculty',
+        message: 'Failed to update major',
         statusCode: response.statusCode,
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
         return ApiResponse.error(
-          message: 'Faculty not found',
+          message: 'Major not found',
           statusCode: 404,
         );
       }
-      
       if (e.response?.statusCode == 422) {
         return ApiResponse.error(
           message: 'Validation error',
@@ -236,7 +236,7 @@ class FacultyService {
       }
       
       return ApiResponse.error(
-        message: e.response?.data['message'] ?? 'Failed to update faculty',
+        message: e.response?.data['message'] ?? 'Failed to update major',
         statusCode: e.response?.statusCode,
       );
     } catch (e) {
@@ -246,34 +246,35 @@ class FacultyService {
     }
   }
 
-  /// Delete faculty
-  /// DELETE /{panel}/faculties/{id}
-  Future<ApiResponse<void>> deleteFaculty(int id) async {
+  /// Delete major
+  /// DELETE /{panel}/majors/{id}
+  Future<ApiResponse<MajorModel?>> deleteMajor(int id) async {
     try {
-      final response = await _apiClient.dio.delete('/$panel/faculties/$id');
+      final response = await _apiClient.dio.delete('/$panel/majors/$id');
 
       if (response.statusCode == 200) {
-        return ApiResponse.success(
+        return ApiResponse(
+          success: true,
           data: null,
-          message: 'Faculty deleted successfully',
+          message: 'Major deleted successfully',
           statusCode: response.statusCode,
         );
       }
 
       return ApiResponse.error(
-        message: 'Failed to delete faculty',
+        message: 'Failed to delete major',
         statusCode: response.statusCode,
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
         return ApiResponse.error(
-          message: 'Faculty not found',
+          message: 'Major not found',
           statusCode: 404,
         );
       }
       
       return ApiResponse.error(
-        message: e.response?.data['message'] ?? 'Failed to delete faculty',
+        message: e.response?.data['message'] ?? 'Failed to delete major',
         statusCode: e.response?.statusCode,
       );
     } catch (e) {

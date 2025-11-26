@@ -254,14 +254,46 @@ class _AppDrawerState extends State<AppDrawer> {
       );
     }
     
-    // Major Team menus
-    if (RolePermissions.hasMenuAccess(userRole, 'major_survey_sections')) {
+    // Major Team menus - Dashboard and Survey
+    if (RolePermissions.hasMenuAccess(userRole, 'dashboard') && userRole == UserRole.majorTeam) {
+      // Dashboard menu
+      menus.add(
+        _buildMenuItem(
+          context,
+          icon: Icons.dashboard_outlined,
+          title: 'Dashboard',
+          route: '/major-dashboard',
+        ),
+      );
+      
+      // Survey menu with submenu
+      menus.add(
+        Theme(
+          data: Theme.of(context).copyWith(
+            dividerColor: Colors.transparent,
+          ),
+          child: ExpansionTile(
+            leading: const Icon(Icons.assignment_outlined),
+            title: const Text('Survey'),
+            children: [
+              _buildSubMenuItem(
+                context,
+                icon: Icons.description_outlined,
+                title: 'Survey Management',
+                route: '/major-survey-management',
+              ),
+            ],
+          ),
+        ),
+      );
+    } else if (RolePermissions.hasMenuAccess(userRole, 'major_survey_sections') && userRole != UserRole.majorTeam) {
+      // Fallback for other roles that have major_survey_sections access
       menus.add(
         ListTile(
           leading: const Icon(Icons.assignment_outlined),
           title: const Text('Survey Pertanyaan Tambahan'),
           onTap: () {
-            context.go('/major-survey-sections');
+            context.go('/major-survey-management');
             Navigator.pop(context);
           },
         ),
@@ -349,6 +381,50 @@ class _AppDrawerState extends State<AppDrawer> {
           ),
         ],
       ),
+    );
+  }
+
+  /// Build a single menu item (non-expandable)
+  Widget _buildMenuItem(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String route,
+  }) {
+    // Safely get current route
+    String currentRoute = '/';
+    try {
+      currentRoute = GoRouterState.of(context).uri.toString();
+    } catch (e) {
+      debugPrint('Could not get current route: $e');
+    }
+    final isSelected = currentRoute.startsWith(route);
+    
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: isSelected ? AppColors.primary : AppColors.textSecondary,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: isSelected ? AppColors.primary : AppColors.textPrimary,
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        ),
+      ),
+      selected: isSelected,
+      selectedTileColor: AppColors.primary.withValues(alpha: 0.08),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+      ),
+      onTap: () {
+        Navigator.pop(context);
+        Future.microtask(() {
+          if (context.mounted) {
+            context.go(route);
+          }
+        });
+      },
     );
   }
 

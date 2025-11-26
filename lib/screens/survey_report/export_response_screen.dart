@@ -247,38 +247,39 @@ class _ExportResponseScreenState extends State<ExportResponseScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Row(
-            children: _layouts.map((layout) {
-              return Expanded(
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      _selectedLayout = layout;
-                    });
-                  },
-                  child: Row(
-                    children: [
-                      Radio<String>(
-                        value: layout,
-                        groupValue: _selectedLayout,
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              _selectedLayout = value;
-                            });
-                          }
-                        },
-                        activeColor: AppColors.primary,
-                      ),
-                      Text(
-                        layout,
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    ],
+          RadioGroup<String>(
+            groupValue: _selectedLayout,
+            onChanged: (value) {
+              if (value != null) {
+                setState(() {
+                  _selectedLayout = value;
+                });
+              }
+            },
+            child: Row(
+              children: _layouts.map((layout) {
+                return Expanded(
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedLayout = layout;
+                      });
+                    },
+                    child: Row(
+                      children: [
+                        Radio<String>(
+                          value: layout,
+                        ),
+                        Text(
+                          layout,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              }).toList(),
+            ),
           ),
           
           const SizedBox(height: 24),

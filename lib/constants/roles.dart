@@ -65,6 +65,8 @@ class RolePermissions {
   ];
 
   /// Major Team permissions
+  /// - Dashboard
+  /// - Melihat daftar survey
   /// - Melihat detail pertanyaan tambahan suatu kuesioner sesuai dengan prodi yang login
   /// - Menambah pertanyaan tambahan suatu kuesioner sesuai dengan prodi yang login
   /// - Mengubah pertanyaan tambahan suatu kuesioner sesuai dengan prodi yang login
@@ -76,6 +78,8 @@ class RolePermissions {
   /// - Menyediakan dashboard untuk membantu pengisian laporan BAN PT
   /// - Mengexport hasil responden kuisioner ke dalam format Kementerian
   static const List<String> majorTeamMenus = [
+    'dashboard', // Dashboard
+    'major_survey_management', // Survey Management (untuk major team)
     'major_survey_sections', // Survey Pertanyaan Tambahan (Major-specific)
   ];
 

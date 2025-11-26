@@ -14,6 +14,10 @@ import '../screens/survey_report/survey_report_screen.dart';
 import '../screens/survey_report/survey_statistics_screen.dart';
 import '../screens/survey_report/alumni_response_detail_screen.dart';
 import '../screens/survey_report/export_response_screen.dart';
+import '../screens/major_team/major_dashboard_screen.dart';
+import '../screens/major_team/major_survey_management_screen.dart';
+import '../screens/major_team/major_survey_detail_screen.dart';
+import '../screens/major_team/major_response_detail_screen.dart';
 import '../screens/public/public_home_screen.dart';
 import '../screens/public/faq_screen.dart';
 import '../screens/public/alumni_verification_screen.dart';
@@ -211,6 +215,52 @@ class AppRouter {
           return ExportResponseScreen(
             surveyId: surveyId,
             respondentId: respondentId,
+          );
+        },
+      ),
+      
+      // Major Team routes
+      GoRoute(
+        path: '/major-dashboard',
+        name: 'major-dashboard',
+        builder: (context, state) => const MajorDashboardScreen(),
+      ),
+      
+      GoRoute(
+        path: '/major-survey-management',
+        name: 'major-survey-management',
+        builder: (context, state) => const MajorSurveyManagementScreen(),
+      ),
+      
+      GoRoute(
+        path: '/major-survey-sections/:surveyId',
+        name: 'major-survey-sections',
+        builder: (context, state) {
+          final surveyId = int.parse(state.pathParameters['surveyId']!);
+          final args = state.extra as Map<String, dynamic>?;
+          final surveyTitle = args?['surveyTitle'] as String? ?? 'Survey';
+          return MajorSurveyDetailScreen(
+            surveyId: surveyId,
+            surveyTitle: surveyTitle,
+          );
+        },
+      ),
+      
+      // Major Response Detail route
+      GoRoute(
+        path: '/major-response-detail/:surveyId/:respondentId',
+        name: 'major-response-detail',
+        builder: (context, state) {
+          final surveyId = int.parse(state.pathParameters['surveyId']!);
+          final respondentId = int.parse(state.pathParameters['respondentId']!);
+          final args = state.extra as Map<String, dynamic>?;
+          final surveyTitle = args?['surveyTitle'] as String?;
+          final respondentName = args?['respondentName'] as String?;
+          return MajorResponseDetailScreen(
+            surveyId: surveyId,
+            respondentId: respondentId,
+            surveyTitle: surveyTitle,
+            respondentName: respondentName,
           );
         },
       ),
