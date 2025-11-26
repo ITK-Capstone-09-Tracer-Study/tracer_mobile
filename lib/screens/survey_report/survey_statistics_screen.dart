@@ -7,6 +7,7 @@ import '../../constants/app_constants.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/app_drawer.dart';
 import '../../providers/survey_report_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../models/survey_report_model.dart';
 
 class SurveyStatisticsScreen extends StatefulWidget {
@@ -25,16 +26,69 @@ class _SurveyStatisticsScreenState extends State<SurveyStatisticsScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _horizontalScrollController = ScrollController();
   bool _showFilters = false;
+  
+  // User context for head_of_unit
+  String? _userUnitType;
+  int? _userUnitId;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = context.read<SurveyReportProvider>();
-      provider.fetchSurveyDetail(widget.surveyId);
-      provider.fetchFaculties();
-      provider.fetchMajors();
+      final authProvider = context.read<AuthProvider>();
+      final surveyProvider = context.read<SurveyReportProvider>();
+      
+      // Get user's unit context
+      final currentUser = authProvider.currentUser;
+      if (currentUser?.role == 'head_of_unit') {
+        _userUnitType = currentUser?.unitType;
+        _userUnitId = currentUser?.unitId;
+      }
+      
+      // Fetch data with user context filter
+      surveyProvider.fetchSurveyDetail(
+        widget.surveyId,
+        userUnitType: _userUnitType,
+        userUnitId: _userUnitId,
+      );
+      
+      // Fetch faculties and majors (only if needed based on unit type)
+      if (_userUnitType == 'faculty') {
+        surveyProvider.fetchMajorsByFaculty(_userUnitId);
+      } else if (_userUnitType != 'major') {
+        // For institutional or other types, fetch all
+        surveyProvider.fetchFaculties();
+        surveyProvider.fetchMajors();
+      }
     });
+  }
+  
+  /// Check if faculty column should be shown
+  /// Hidden for both faculty and major unit type head_of_unit
+  bool get _showFacultyColumn => _userUnitType != 'faculty' && _userUnitType != 'major';
+  
+  /// Check if major (prodi) column should be shown
+  /// Hidden only for major unit type head_of_unit  
+  bool get _showMajorColumn => _userUnitType != 'major';
+  
+  /// Check if faculty filter should be shown
+  bool get _showFacultyFilter => _userUnitType != 'faculty' && _userUnitType != 'major';
+  
+  /// Check if major filter should be shown
+  bool get _showMajorFilter => _userUnitType != 'major';
+  
+  /// Calculate table width based on visible columns
+  double _calculateTableWidth() {
+    // Base width for: Nama(3) + Email(3) + NIM(2) + Selesai Pada(2) = 10 flex units
+    double baseWidth = 700;
+    
+    // Add width for faculty column (3 flex units)
+    if (_showFacultyColumn) baseWidth += 250;
+    
+    // Add width for major column (3 flex units)
+    if (_showMajorColumn) baseWidth += 250;
+    
+    return baseWidth;
   }
 
   @override
@@ -152,39 +206,42 @@ class _SurveyStatisticsScreenState extends State<SurveyStatisticsScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.border),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Stack(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.filter_list),
-                            onPressed: () {
-                              setState(() {
-                                _showFilters = !_showFilters;
-                              });
-                            },
-                          ),
-                          if (provider.selectedFacultyId != null ||
-                              provider.selectedMajorId != null)
-                            Positioned(
-                              right: 8,
-                              top: 8,
-                              child: Container(
-                                width: 8,
-                                height: 8,
-                                decoration: const BoxDecoration(
-                                  color: AppColors.primary,
-                                  shape: BoxShape.circle,
+                    // Only show filter button if there are filters to show
+                    if (_showFacultyFilter || _showMajorFilter) ...[
+                      const SizedBox(width: 12),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.border),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Stack(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.filter_list),
+                              onPressed: () {
+                                setState(() {
+                                  _showFilters = !_showFilters;
+                                });
+                              },
+                            ),
+                            if (provider.selectedFacultyId != null ||
+                                provider.selectedMajorId != null)
+                              Positioned(
+                                right: 8,
+                                top: 8,
+                                child: Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.primary,
+                                    shape: BoxShape.circle,
+                                  ),
                                 ),
                               ),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                     const SizedBox(width: 8),
                     IconButton(
                       icon: const Icon(Icons.view_list),
@@ -195,7 +252,7 @@ class _SurveyStatisticsScreenState extends State<SurveyStatisticsScreen> {
               ),
 
               // Filter Panel
-              if (_showFilters)
+              if (_showFilters && (_showFacultyFilter || _showMajorFilter))
                 Container(
                   margin: const EdgeInsets.all(AppConstants.paddingLarge),
                   padding: const EdgeInsets.all(16),
@@ -227,81 +284,83 @@ class _SurveyStatisticsScreenState extends State<SurveyStatisticsScreen> {
                       ),
                       const SizedBox(height: 12),
                       
-                      // Faculty Dropdown
-                      const Text(
-                        'Fakultas',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      DropdownButtonFormField<int>(
-                        initialValue: provider.selectedFacultyId,
-                        decoration: const InputDecoration(
-                          hintText: 'Select an option',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
+                      // Faculty Dropdown - Only show if not faculty or major unit type
+                      if (_showFacultyFilter) ...[
+                        const Text(
+                          'Fakultas',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 13,
                           ),
                         ),
-                        items: [
-                          const DropdownMenuItem<int>(
-                            value: null,
-                            child: Text('All Faculties'),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<int>(
+                          initialValue: provider.selectedFacultyId,
+                          decoration: const InputDecoration(
+                            hintText: 'Select an option',
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                           ),
-                          ...provider.faculties.map((faculty) {
-                            return DropdownMenuItem<int>(
-                              value: faculty.id,
-                              child: Text(faculty.name),
-                            );
-                          }),
-                        ],
-                        onChanged: (value) {
-                          provider.setFacultyFilter(value);
-                        },
-                      ),
+                          items: [
+                            const DropdownMenuItem<int>(
+                              value: null,
+                              child: Text('All Faculties'),
+                            ),
+                            ...provider.faculties.map((faculty) {
+                              return DropdownMenuItem<int>(
+                                value: faculty.id,
+                                child: Text(faculty.name),
+                              );
+                            }),
+                          ],
+                          onChanged: (value) {
+                            provider.setFacultyFilter(value);
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                       
-                      const SizedBox(height: 16),
-                      
-                      // Major Dropdown
-                      const Text(
-                        'Program Studi',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      DropdownButtonFormField<int>(
-                        initialValue: provider.selectedMajorId,
-                        decoration: const InputDecoration(
-                          hintText: 'Select an option',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
+                      // Major Dropdown - Only show if not major unit type
+                      if (_showMajorFilter) ...[
+                        const Text(
+                          'Program Studi',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 13,
                           ),
                         ),
-                        items: [
-                          const DropdownMenuItem<int>(
-                            value: null,
-                            child: Text('All Programs'),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<int>(
+                          initialValue: provider.selectedMajorId,
+                          decoration: const InputDecoration(
+                            hintText: 'Select an option',
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
                           ),
-                          ...provider.majors.map((major) {
-                            return DropdownMenuItem<int>(
-                              value: major.id,
-                              child: Text(major.name),
-                            );
-                          }),
-                        ],
-                        onChanged: (value) {
-                          provider.setMajorFilter(value);
-                        },
-                      ),
-                      
-                      const SizedBox(height: 16),
+                          items: [
+                            const DropdownMenuItem<int>(
+                              value: null,
+                              child: Text('All Programs'),
+                            ),
+                            ...provider.majors.map((major) {
+                              return DropdownMenuItem<int>(
+                                value: major.id,
+                                child: Text(major.name),
+                              );
+                            }),
+                          ],
+                          onChanged: (value) {
+                            provider.setMajorFilter(value);
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                       
                       // Apply Button
                       SizedBox(
@@ -339,7 +398,8 @@ class _SurveyStatisticsScreenState extends State<SurveyStatisticsScreen> {
                     scrollDirection: Axis.horizontal,
                     controller: _horizontalScrollController,
                     child: SizedBox(
-                      width: 1200,
+                      // Adjust width based on visible columns
+                      width: _calculateTableWidth(),
                       child: Column(
                         children: [
                           // Table Header
@@ -436,8 +496,10 @@ class _SurveyStatisticsScreenState extends State<SurveyStatisticsScreen> {
           _buildHeaderCell('Nama', flex: 3),
           _buildHeaderCell('Email', flex: 3),
           _buildHeaderCell('NIM', flex: 2),
-          _buildHeaderCell('Fakultas', flex: 3),
-          _buildHeaderCell('Program Studi', flex: 3),
+          if (_showFacultyColumn)
+            _buildHeaderCell('Fakultas', flex: 3),
+          if (_showMajorColumn)
+            _buildHeaderCell('Program Studi', flex: 3),
           _buildHeaderCell('Selesai Pada', flex: 2),
         ],
       ),
@@ -510,24 +572,26 @@ class _SurveyStatisticsScreenState extends State<SurveyStatisticsScreen> {
               style: const TextStyle(fontSize: 13),
             ),
           ),
-          Expanded(
-            flex: 3,
-            child: Text(
-              response.facultyName,
-              style: const TextStyle(fontSize: 13),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+          if (_showFacultyColumn)
+            Expanded(
+              flex: 3,
+              child: Text(
+                response.facultyName,
+                style: const TextStyle(fontSize: 13),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Text(
-              response.majorName,
-              style: const TextStyle(fontSize: 13),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+          if (_showMajorColumn)
+            Expanded(
+              flex: 3,
+              child: Text(
+                response.majorName,
+                style: const TextStyle(fontSize: 13),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
           Expanded(
             flex: 2,
             child: response.completedAt != null

@@ -28,6 +28,13 @@ class AuthService {
       'name': 'Kepala Unit',
       'unit_type': 'institutional',
     },
+    'headofsetdesigner@itk.ac.id': {
+      'password': 'password',
+      'role': 'head_of_unit',
+      'name': 'Kepala Unit SD',
+      'unit_type': 'major',
+      'unit_id': 5, // Set Designer major
+    },
   };
 
   /// Check if email is a development bypass account
@@ -57,6 +64,7 @@ class AuthService {
           'role': account['role'],
           'name': account['name'],
           'unit_type': account['unit_type'],
+          'unit_id': account['unit_id'], // Include unit_id if available
           'nik_nip': '000000000',
           'phone_number': '081234567890',
         },

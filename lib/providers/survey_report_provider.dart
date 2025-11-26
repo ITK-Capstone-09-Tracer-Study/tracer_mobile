@@ -127,10 +127,24 @@ class SurveyReportProvider extends ChangeNotifier {
   
   // ===== SURVEY DETAIL METHODS =====
   
+  // User context for filtering (head_of_unit)
+  String? _userUnitType;
+  int? _userUnitId;
+  
+  String? get userUnitType => _userUnitType;
+  int? get userUnitId => _userUnitId;
+  
   /// Fetch survey detail with statistics and responses
-  Future<void> fetchSurveyDetail(int surveyId) async {
+  /// Optionally filter by user's unit context (for head_of_unit role)
+  Future<void> fetchSurveyDetail(
+    int surveyId, {
+    String? userUnitType,
+    int? userUnitId,
+  }) async {
     _isLoading = true;
     _errorMessage = null;
+    _userUnitType = userUnitType;
+    _userUnitId = userUnitId;
     notifyListeners();
     
     try {
@@ -143,14 +157,30 @@ class SurveyReportProvider extends ChangeNotifier {
       
       // Dummy data
       _selectedSurvey = _surveys.firstWhere((s) => s.id == surveyId);
+      
+      // Generate all responses first
+      _responses = _generateDummyResponses();
+      
+      // Apply user context filter for head_of_unit
+      if (userUnitType == 'faculty' && userUnitId != null) {
+        // Filter by faculty ID
+        _filteredResponses = _responses.where((r) => r.facultyId == userUnitId).toList();
+      } else if (userUnitType == 'major' && userUnitId != null) {
+        // Filter by major ID
+        _filteredResponses = _responses.where((r) => r.majorId == userUnitId).toList();
+      } else {
+        _filteredResponses = List.from(_responses);
+      }
+      
+      // Calculate statistics based on filtered responses
+      final completed = _filteredResponses.where((r) => r.hasCompleted).length;
+      final notCompleted = _filteredResponses.where((r) => !r.hasCompleted).length;
       _statistics = SurveyStatisticsModel(
         surveyId: surveyId,
-        totalTarget: 31,
-        completed: 8,
-        notCompleted: 23,
+        totalTarget: _filteredResponses.length,
+        completed: completed,
+        notCompleted: notCompleted,
       );
-      _responses = _generateDummyResponses();
-      _filteredResponses = List.from(_responses);
       
       _isLoading = false;
       notifyListeners();
@@ -208,6 +238,51 @@ class SurveyReportProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _errorMessage = 'Failed to fetch majors: $e';
+      notifyListeners();
+    }
+  }
+  
+  /// Fetch majors by faculty ID (for faculty head_of_unit)
+  Future<void> fetchMajorsByFaculty(int? facultyId) async {
+    if (facultyId == null) {
+      _filteredMajors = [];
+      notifyListeners();
+      return;
+    }
+    
+    try {
+      // TODO: Implement API call
+      // final response = await apiService.getMajorsByFaculty(facultyId);
+      
+      await Future.delayed(const Duration(milliseconds: 300));
+      
+      // Dummy data - filter majors by facultyId
+      // Map faculty ID to faculty name for filtering
+      final facultyNames = {
+        1: 'Fakultas Consequuntur Magnam Libero',
+        2: 'Fakultas Iure Quo Dolores',
+        3: 'Fakultas Qui Deleniti Pariatur',
+        4: 'Fakultas Cupiditate Quos Commodi',
+      };
+      
+      final allMajors = [
+        MajorModel(id: 1, departmentId: 1, code: 'SUR', name: 'Surveyor', facultyName: 'Fakultas Consequuntur Magnam Libero'),
+        MajorModel(id: 2, departmentId: 2, code: 'ENV', name: 'Environmental Compliance Inspector', facultyName: 'Fakultas Iure Quo Dolores'),
+        MajorModel(id: 3, departmentId: 3, code: 'OIL', name: 'Oil Service Unit Operator', facultyName: 'Fakultas Iure Quo Dolores'),
+        MajorModel(id: 4, departmentId: 4, code: 'PRD', name: 'Production Worker', facultyName: 'Fakultas Qui Deleniti Pariatur'),
+        MajorModel(id: 5, departmentId: 5, code: 'SET', name: 'Set Designer', facultyName: 'Fakultas Consequuntur Magnam Libero'),
+        MajorModel(id: 6, departmentId: 6, code: 'EED', name: 'Electrical and Electronics Drafter', facultyName: 'Fakultas Iure Quo Dolores'),
+        MajorModel(id: 7, departmentId: 7, code: 'CRI', name: 'Criminal Investigator', facultyName: 'Fakultas Cupiditate Quos Commodi'),
+        MajorModel(id: 8, departmentId: 8, code: 'HAN', name: 'Hand Presser', facultyName: 'Fakultas Qui Deleniti Pariatur'),
+      ];
+      
+      _majors = allMajors;
+      final targetFacultyName = facultyNames[facultyId];
+      _filteredMajors = allMajors.where((m) => m.facultyName == targetFacultyName).toList();
+      
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = 'Failed to fetch majors by faculty: $e';
       notifyListeners();
     }
   }
