@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../constants/colors.dart';
 import '../../constants/app_constants.dart';
@@ -552,11 +553,22 @@ class _AlumniResponseDetailScreenState extends State<AlumniResponseDetailScreen>
   }
 
   void _handleExport(SurveyResponseProvider provider) {
-    // TODO: Implement export functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Fitur export akan segera tersedia'),
-      ),
+    if (provider.selectedRespondentId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pilih alumni terlebih dahulu'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+    
+    context.push(
+      '/export-response',
+      extra: {
+        'surveyId': widget.surveyId,
+        'respondentId': provider.selectedRespondentId,
+      },
     );
   }
 }

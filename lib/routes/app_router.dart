@@ -13,6 +13,7 @@ import '../screens/survey_kinds/survey_kind_form_screen.dart';
 import '../screens/survey_report/survey_report_screen.dart';
 import '../screens/survey_report/survey_statistics_screen.dart';
 import '../screens/survey_report/alumni_response_detail_screen.dart';
+import '../screens/survey_report/export_response_screen.dart';
 import '../screens/public/public_home_screen.dart';
 import '../screens/public/faq_screen.dart';
 import '../screens/public/alumni_verification_screen.dart';
@@ -196,6 +197,20 @@ class AppRouter {
           return AlumniResponseDetailScreen(
             surveyId: surveyId,
             initialRespondentId: respondentId,
+          );
+        },
+      ),
+      
+      GoRoute(
+        path: '/export-response',
+        name: 'export-response',
+        builder: (context, state) {
+          final args = state.extra as Map<String, dynamic>?;
+          final surveyId = args?['surveyId'] as int? ?? 0;
+          final respondentId = args?['respondentId'] as int? ?? 0;
+          return ExportResponseScreen(
+            surveyId: surveyId,
+            respondentId: respondentId,
           );
         },
       ),
